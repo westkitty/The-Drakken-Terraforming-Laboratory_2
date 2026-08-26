@@ -4,6 +4,28 @@ A deterministic computational laboratory for Drakken planetary transformation wo
 
 This repository treats the supplied Starsilk mechanics as literal simulation invariants. Starsilk is a programmable cosmological substrate. A Macro is an executable deterministic reality loop. Removing the final available Starsilk from an active stellar core is not a warning threshold: it is an immediate state transition to black-hole collapse. Any positive Syrin-blood contact nullifies the active Starsilk runtime and leaves its active threads inert.
 
+## Interactive laboratory
+
+`drakken-lab dashboard` is the product interface. It starts a loopback-only local server and opens an interactive browser workbench; it is not a terminal report. No Node, Vite, Docker, cloud service, account, or external runtime is required after the Python package is installed.
+
+The workbench contains five live stations:
+
+- **Planetary Transformation Workbench** — a rotatable planetary projection driven by the actual atmospheric, lithospheric, and thermal grids. Select Heat, Cool, Uplift, Fracture, Pressure, or CO₂ and click the planet to commit the corresponding Starsilk emission into the solver. Switch among composite, thermal, lithosphere, atmosphere, and Starsilk field views.
+- **Starsilk Macro Runtime** — edit Macro source, compile it, step deterministic instructions one at a time, run/pause the execution cursor, inspect registers, and watch `EMIT` operations mutate the same live planet. A heliocide preset exposes the hard zero-Starsilk collapse boundary.
+- **Starbinding Vector Bench** — aim star-dive vectors by offset and approach angle, vary velocity and withdrawal fraction, and commit them against the actual ray/core intersection model. Hits, misses, surviving partial withdrawals, and heliocide are visually distinct.
+- **Siege Wall Heliocide Lattice** — generate singularities from actual `HeliocideEvent` objects, place orbital nodes, solve the inverse-square anchoring matrix, visualize event-horizon sources and node loads, and deliberately drive the lattice into a capacity fracture.
+- **Deterministic Telemetry Ledger** — inspect the ordered mutation record without introducing wall-clock input into simulation state.
+
+Syrin blood injection is available from the main workbench. Any positive finite contact immediately makes the Starsilk runtime inert and disables Starsilk-driven controls until the entire laboratory session is reset. Natural planetary solver stepping remains possible because nullifying Starsilk does not freeze ordinary physics.
+
+Launch it:
+
+```bash
+drakken-lab dashboard
+```
+
+By default the laboratory binds only to `127.0.0.1:8765`. If that port is occupied, the launcher searches the next ten ports rather than terminating an unrelated process. Use `--no-open` when you want the server without an automatic browser tab.
+
 ## Canon invariants encoded in the runtime
 
 1. **Starsilk is programmable substrate, not metaphor.** Macro source is parsed into an AST and executed by a bounded deterministic runtime.
@@ -39,6 +61,13 @@ This repository treats the supplied Starsilk mechanics as literal simulation inv
 │   │       ├── models.py
 │   │       ├── monitor.py
 │   │       └── physics.py
+│   ├── labui
+│   │   ├── server.py
+│   │   ├── session.py
+│   │   └── static
+│   │       ├── app.js
+│   │       ├── index.html
+│   │       └── styles.css
 │   ├── scenarios
 │   │   ├── constants.py
 │   │   ├── siege_wall.py
@@ -56,6 +85,7 @@ This repository treats the supplied Starsilk mechanics as literal simulation inv
 └── tests
     ├── test_executor.py
     ├── test_integration.py
+    ├── test_labui.py
     ├── test_lattice.py
     ├── test_parser.py
     ├── test_registers.py
@@ -88,6 +118,7 @@ After installation:
 
 ```bash
 drakken-lab dashboard
+drakken-lab report
 drakken-lab scenario starbinding
 drakken-lab scenario siege-wall
 drakken-lab scenario syrin
@@ -312,6 +343,8 @@ pytest
 
 The suite covers:
 
+- local browser server delivery and API mutation paths
+- browser-session planetary brush behavior, Macro stepping, Starbinding vector hits/misses, Siege Wall stable/fractured states, and Syrin UI lockout
 - parsing and nested repeat blocks
 - bounded Decimal arithmetic and overflow
 - loop/cycle enforcement

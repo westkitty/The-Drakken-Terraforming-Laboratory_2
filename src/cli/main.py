@@ -17,6 +17,7 @@ from sim.terraforming.grids import AtmosphericGrid, LithosphereGrid, ThermalGrid
 from .dashboard import render_banner, render_report
 from .repl import run_repl
 from .telemetry import TelemetryLogger
+from labui.server import launch_laboratory
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -46,7 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
     macro.add_argument("--telemetry", type=Path)
 
     sub.add_parser("repl", help="interactive Starsilk macro REPL")
-    sub.add_parser("dashboard", help="show deterministic reference scenario dashboard")
+    dashboard = sub.add_parser("dashboard", help="launch the interactive browser laboratory")
+    dashboard.add_argument("--host", default="127.0.0.1")
+    dashboard.add_argument("--port", type=int, default=8765)
+    dashboard.add_argument("--no-open", action="store_true", help="serve without opening a browser tab")
+    sub.add_parser("report", help="print deterministic reference scenario reports in the terminal")
     return parser
 
 
@@ -115,6 +120,8 @@ def main(argv: list[str] | None = None) -> int:
         run_repl()
         return 0
     if args.command == "dashboard":
+        return launch_laboratory(host=args.host, port=args.port, open_browser=not args.no_open)
+    if args.command == "report":
         render_banner()
         render_report("Starbinding", run_starbinding())
         render_report("Siege Wall", run_siege_wall())

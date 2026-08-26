@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "drakken-terraforming-laboratory"
-version = "1.0.0"
+version = "1.1.0"
 description = "Deterministic Starsilk macro and planetary transformation laboratory."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -27,8 +27,11 @@ package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["core*", "sim*", "scenarios*", "cli*"]
+include = ["core*", "sim*", "scenarios*", "cli*", "labui*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.setuptools.package-data]
+labui = ["static/*.html", "static/*.css", "static/*.js"]
