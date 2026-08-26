@@ -6,18 +6,28 @@ This repository treats the supplied Starsilk mechanics as literal simulation inv
 
 ## Interactive laboratory
 
-`drakken-lab dashboard` is the product interface. It starts a loopback-only local server and opens an interactive browser workbench; it is not a terminal report. No Node, Vite, Docker, cloud service, account, or external runtime is required after the Python package is installed.
+`drakken-lab dashboard` is the product interface. It starts a loopback-only local server and opens the graphical command-center workbench; terminal reports remain a developer/diagnostic path under `drakken-lab report`. No Node, Vite, Docker, cloud service, account, or network runtime is required after the Python package is installed.
+
+### v1.3 command-center presentation
+
+The v1.3 interface is the real application, not concept art. The validated v1.2 controls remain intact underneath a new cinematic presentation layer:
+
+- a hardware-accelerated WebGL2 globe when the browser supports it, with an in-package deterministic Canvas globe renderer as automatic fallback;
+- atmospheric rim lighting, orbital HUD rings, projector geometry, field-status overlays, instrument panels, and command-deck styling;
+- real lithospheric stress exposed from the solver and rendered as orange fracture energy rather than decorative effects;
+- shared planetary state across the Planet, Macro, and Incubator stations, so mutations remain visible wherever the globe appears;
+- graceful fallback without changing simulation behavior if WebGL2 is disabled.
 
 The workbench contains six live stations:
 
-- **Planetary Transformation Workbench** — a rotatable planetary projection driven by the actual atmospheric, lithospheric, and thermal grids. Select Heat, Cool, Uplift, Fracture, Pressure, or CO₂ and click the planet to commit the corresponding Starsilk emission into the solver. Switch among composite, thermal, lithosphere, atmosphere, and Starsilk field views.
+- **Planetary Transformation Workbench** — a rotatable command-center globe driven by the actual atmospheric, lithospheric, thermal, and stress grids. Select Heat, Cool, Uplift, Fracture, Pressure, or CO₂ and click the planet to commit the corresponding Starsilk emission into the solver. Switch among composite, thermal, lithosphere, atmosphere, and Starsilk field views.
 - **Starsilk Macro Runtime** — edit Macro source, compile it, step deterministic instructions one at a time, run/pause the execution cursor, inspect registers, and watch `EMIT` operations mutate the same live planet. A heliocide preset exposes the hard zero-Starsilk collapse boundary.
 - **Starbinding Vector Bench** — aim star-dive vectors by offset and approach angle, vary velocity and withdrawal fraction, and commit them against the actual ray/core intersection model. Hits, misses, surviving partial withdrawals, and heliocide are visually distinct.
 - **Siege Wall Heliocide Lattice** — generate singularities from actual `HeliocideEvent` objects, place orbital nodes, solve the inverse-square anchoring matrix, visualize event-horizon sources and node loads, and deliberately drive the lattice into a capacity fracture.
-- **Drakken Egg & Specimen Incubator** — hatch deterministic laboratory models for the canon-attested Fault-Tongue, Obsidian Gul, Tremorhound, and Vortenbray phenotypes, or compile a clearly labeled non-canon Experimental Egg. Each specimen runs an autonomous Notebook-field path across the same live planet and leaves profile-specific thermal, lithic, stress, or atmospheric consequences. Named archive models are locked; only the Experimental Egg accepts user-tuned phenotype coefficients.
+- **Drakken Egg & Specimen Incubator** — hatch deterministic laboratory models for the canon-attested Fault-Tongue, Obsidian Gul, Tremorhound, and Vortenbray phenotypes, or compile a clearly labeled non-canon Experimental Egg. Each specimen runs an autonomous Notebook-field path across the same live planet and leaves solver-backed thermal, lithic, stress, or atmospheric consequences.
 - **Deterministic Telemetry Ledger** — inspect the ordered mutation record without introducing wall-clock input into simulation state.
 
-Syrin blood injection is available from the main workbench. Any positive finite contact immediately makes the Starsilk runtime inert and disables Starsilk-driven controls until the entire laboratory session is reset. Natural planetary solver stepping remains possible because nullifying Starsilk does not freeze ordinary physics.
+Syrin blood injection is available from the main workbench. Any positive finite contact immediately makes the Starsilk runtime inert, visibly desaturates/nullifies the command-center field, and disables Starsilk-driven controls until the entire laboratory session is reset. Natural planetary solver stepping remains possible because nullifying Starsilk does not freeze ordinary physics.
 
 Launch it:
 
@@ -26,13 +36,6 @@ drakken-lab dashboard
 ```
 
 By default the laboratory binds only to `127.0.0.1:8765`. If that port is occupied, the launcher searches the next ten ports rather than terminating an unrelated process. Use `--no-open` when you want the server without an automatic browser tab.
-
-
-### Drakken specimen modeling boundary
-
-The Incubator deliberately separates canon from laboratory coefficients. The names and incident summaries for Fault-Tongue, Obsidian Gul, Tremorhound, and Vortenbray are canon anchors. Their numerical pulse strength, movement path, and solver coefficients are deterministic laboratory models chosen to make the attested behavior inspectable inside the available atmospheric/lithospheric/thermal channels; they are not asserted as exact biological measurements. `Experimental Egg` is explicitly labeled non-canon.
-
-Syrin contact nullifies the specimen's active Notebook Starsilk field. The laboratory does **not** infer that the physical Drakken specimen dies or ceases ordinary biological existence; it records only the canonical Starsilk nullification effect.
 
 ## Canon invariants encoded in the runtime
 
@@ -75,6 +78,8 @@ Syrin contact nullifies the specimen's active Notebook Starsilk field. The labor
 │   │   ├── specimens.py
 │   │   └── static
 │   │       ├── app.js
+│   │       ├── command-center.css
+│   │       ├── command-center.js
 │   │       ├── incubator.css
 │   │       ├── incubator.js
 │   │       ├── index.html

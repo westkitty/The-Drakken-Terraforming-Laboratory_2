@@ -132,6 +132,7 @@ class LaboratorySession:
             surface_elevation = self.engine.lithosphere.elevation_m[0]
             surface_pressure = self.engine.atmosphere.pressure_pa[0]
             surface_co2 = self.engine.atmosphere.species_fraction["co2"][0]
+            surface_stress = self.engine.lithosphere.stress_pa[0]
             return {
                 "revision": self._revision,
                 "inert": self.runtime.nullifier.inert,
@@ -148,6 +149,7 @@ class LaboratorySession:
                         "elevation_m": np.round(surface_elevation, 3).tolist(),
                         "pressure_pa": np.round(surface_pressure, 3).tolist(),
                         "co2_fraction": np.round(surface_co2, 8).tolist(),
+                        "stress_pa": np.round(surface_stress, 3).tolist(),
                     },
                     "stats": {
                         "temperature_min_k": round(float(surface_temp.min()), 3),
@@ -157,6 +159,7 @@ class LaboratorySession:
                         "elevation_max_m": round(float(surface_elevation.max()), 3),
                         "pressure_mean_pa": round(float(surface_pressure.mean()), 3),
                         "co2_mean_fraction": round(float(surface_co2.mean()), 8),
+                        "stress_max_pa": round(float(surface_stress.max()), 3),
                     },
                 },
                 "star": {

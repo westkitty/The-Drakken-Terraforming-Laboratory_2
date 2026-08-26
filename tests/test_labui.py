@@ -105,11 +105,19 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert b"Planetary Transformation Workbench" in html
         assert b"/static/incubator.css" in html
         assert b"/static/incubator.js" in html
+        assert b"/static/command-center.css" in html
+        assert b"/static/command-center.js" in html
 
         status, content_type, plugin = _request(port, "GET", "/static/incubator.js")
         assert status == 200
         assert "text/javascript" in content_type
         assert b"Drakken Egg & Specimen Incubator" in plugin
+
+        status, content_type, command_center = _request(port, "GET", "/static/command-center.js")
+        assert status == 200
+        assert "text/javascript" in content_type
+        assert b"Command-center renderer" in command_center
+        assert b"CanvasGlobeRenderer" in command_center
 
         status, content_type, raw = _request(port, "GET", "/api/state")
         assert status == 200
@@ -226,3 +234,21 @@ def test_every_specimen_profile_survives_24_deterministic_pulses(profile_id: str
     assert specimen["pulses"] == 24
     assert len(specimen["trail"]) == 25
     assert state["planet"]["state_hash"]
+
+
+def test_command_center_state_exposes_surface_stress_for_real_field_visualization() -> None:
+    session = LaboratorySession()
+    baseline = session.snapshot()
+    assert "stress_pa" in baseline["planet"]["maps"]
+    assert baseline["planet"]["stats"]["stress_max_pa"] == 0.0
+    mutated = session.apply_brush(tool="fracture", row=18, col=36, intensity=100, radius=2)
+    assert mutated["planet"]["stats"]["stress_max_pa"] > 0
+    assert max(max(row) for row in mutated["planet"]["maps"]["stress_pa"]) > 0
+
+
+def test_command_center_specimen_stress_is_visible_in_shared_planet_snapshot() -> None:
+    session = LaboratorySession()
+    session.hatch_specimen(profile_id="fault_tongue", row=18, col=36)
+    state = session.pulse_specimen(steps=3)
+    assert state["planet"]["stats"]["stress_max_pa"] > 0
+    assert state["specimens"]["active"]["effect_totals"]["stress_pa"] > 0
