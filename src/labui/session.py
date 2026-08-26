@@ -26,6 +26,7 @@ from sim.lattice.models import BlackHoleRecord, OrbitalNode
 from sim.lattice.wall import SiegeWallLattice
 from sim.terraforming.engine import TerraformingEngine
 from sim.terraforming.grids import AtmosphericGrid, LithosphereGrid, ThermalGrid
+from .specimens import SPECIMEN_PROFILES, profile_catalog
 
 
 LAB_ROWS = 36
@@ -62,6 +63,9 @@ class LaboratorySession:
         self._starbinding_history: deque[dict[str, Any]] = deque(maxlen=80)
         self._starbinding_sequence = 0
         self._siege_state: dict[str, Any] | None = None
+        self._specimen: dict[str, Any] | None = None
+        self._specimen_history: deque[dict[str, Any]] = deque(maxlen=160)
+        self._specimen_sequence = 0
         self._reset_world(initial=True)
 
     # ------------------------------------------------------------------
@@ -106,6 +110,9 @@ class LaboratorySession:
         self._starbinding_history.clear()
         self._starbinding_sequence = 0
         self._siege_state = None
+        self._specimen = None
+        self._specimen_history.clear()
+        self._specimen_sequence = 0
         self._macro_source = ""
         self._macro_instructions = []
         self._macro_cursor = 0
@@ -173,6 +180,11 @@ class LaboratorySession:
                 "macro": self._macro_status(),
                 "starbinding": {"history": list(self._starbinding_history)},
                 "siege_wall": self._siege_state,
+                "specimens": {
+                    "catalog": profile_catalog(),
+                    "active": self._specimen,
+                    "history": list(self._specimen_history),
+                },
                 "telemetry": list(self._telemetry),
             }
 
@@ -266,6 +278,10 @@ class LaboratorySession:
                 raise ValueError("Syrin contact fraction must be strictly positive")
             record = self.runtime.contact_syrin_blood(contact_fraction=contact_fraction, source="laboratory injection")
             assert record is not None
+            if self._specimen is not None and self._specimen.get("active"):
+                self._specimen["active"] = False
+                self._specimen["field_state"] = "nullified"
+                self._specimen["status_note"] = "Notebook Starsilk field nullified by Syrin contact; physical specimen state is not inferred."
             self._record(
                 "syrin",
                 "Absolute Starsilk nullification interrupt",
@@ -581,6 +597,236 @@ class LaboratorySession:
                 },
             )
             return self.snapshot()
+
+    # ------------------------------------------------------------------
+    # Drakken Egg / specimen incubator
+    # ------------------------------------------------------------------
+    def hatch_specimen(
+        self,
+        *,
+        profile_id: str,
+        row: int,
+        col: int,
+        phenotype: dict[str, float] | None = None,
+    ) -> dict[str, Any]:
+        with self._lock:
+            if self.runtime.nullifier.inert:
+                raise DrakkenLabError("Starsilk runtime is inert; Notebook hatch program cannot execute")
+            if self._specimen is not None and self._specimen.get("active"):
+                raise DrakkenLabError("an active specimen already occupies the incubation field; terminate it first")
+            profile_id = str(profile_id).lower()
+            if profile_id not in SPECIMEN_PROFILES:
+                raise ValueError(f"unknown specimen profile {profile_id!r}")
+            if not (0 <= int(row) < LAB_ROWS and 0 <= int(col) < LAB_COLS):
+                raise ValueError("hatch coordinates are outside the planetary grid")
+            profile = SPECIMEN_PROFILES[profile_id]
+            values = {
+                "thermal": profile.thermal,
+                "elevation": profile.elevation,
+                "stress": profile.stress,
+                "pressure": profile.pressure,
+                "co2": profile.co2,
+            }
+            if phenotype is not None:
+                if profile_id != "experimental_egg":
+                    raise ValueError("archive phenotype models are locked; only Experimental Egg accepts tuning")
+                for key in values:
+                    if key in phenotype:
+                        values[key] = _clamp(_float(phenotype[key]), -1.0, 1.0)
+
+            self._specimen_sequence += 1
+            specimen_id = f"DRK-LAB-{self._specimen_sequence:04d}"
+            self._specimen = {
+                "specimen_id": specimen_id,
+                "profile_id": profile.profile_id,
+                "name": profile.name,
+                "classification": profile.classification,
+                "archive_note": profile.archive_note,
+                "behavior": profile.behavior,
+                "accent": profile.accent,
+                "movement": profile.movement,
+                "active": True,
+                "field_state": "active",
+                "status_note": "Notebook Starsilk field active.",
+                "origin": {"row": int(row), "col": int(col)},
+                "position": {"row": int(row), "col": int(col)},
+                "pulses": 0,
+                "phenotype": values,
+                "trail": [{"row": int(row), "col": int(col), "pulse": 0}],
+                "effect_totals": {
+                    "thermal_j": 0.0,
+                    "elevation_m": 0.0,
+                    "stress_pa": 0.0,
+                    "pressure_pa": 0.0,
+                    "co2_fraction": 0.0,
+                },
+            }
+            record = {
+                "event": "hatch",
+                "specimen_id": specimen_id,
+                "profile_id": profile.profile_id,
+                "name": profile.name,
+                "row": int(row),
+                "col": int(col),
+            }
+            self._specimen_history.append(record)
+            self._record("specimen", "Drakken laboratory specimen hatched", record)
+            return self.snapshot()
+
+    def pulse_specimen(self, *, steps: int) -> dict[str, Any]:
+        with self._lock:
+            if self._specimen is None:
+                raise DrakkenLabError("no specimen is loaded in the incubation field")
+            if self.runtime.nullifier.inert:
+                self._specimen["active"] = False
+                self._specimen["field_state"] = "nullified"
+                self._specimen["status_note"] = "Notebook Starsilk field nullified by Syrin contact; physical specimen state is not inferred."
+                raise DrakkenLabError("Starsilk runtime is inert; specimen Notebook field cannot pulse")
+            if not self._specimen.get("active"):
+                raise DrakkenLabError("specimen field is not active")
+            steps = int(_clamp(float(steps), 1.0, 64.0))
+            start_pulse = int(self._specimen["pulses"])
+            for _ in range(steps):
+                pulse = int(self._specimen["pulses"]) + 1
+                row, col = self._next_specimen_cell(self._specimen, pulse)
+                emissions, totals = self._specimen_emissions(self._specimen, row, col, pulse)
+                self.engine.apply_many(emissions)
+                self.engine.step(0.4)
+                self._specimen["position"] = {"row": row, "col": col}
+                self._specimen["pulses"] = pulse
+                trail = self._specimen["trail"]
+                trail.append({"row": row, "col": col, "pulse": pulse})
+                if len(trail) > 96:
+                    del trail[:-96]
+                for key, value in totals.items():
+                    self._specimen["effect_totals"][key] += value
+                self._specimen_history.append(
+                    {
+                        "event": "pulse",
+                        "specimen_id": self._specimen["specimen_id"],
+                        "pulse": pulse,
+                        "row": row,
+                        "col": col,
+                        "planet_hash": self.engine.state_hash(),
+                    }
+                )
+            self._record(
+                "specimen",
+                "Drakken specimen terraforming pulse sequence executed",
+                {
+                    "specimen_id": self._specimen["specimen_id"],
+                    "profile_id": self._specimen["profile_id"],
+                    "pulses_executed": steps,
+                    "pulse_range": [start_pulse + 1, int(self._specimen["pulses"])],
+                    "position": self._specimen["position"],
+                },
+            )
+            return self.snapshot()
+
+    def terminate_specimen(self) -> dict[str, Any]:
+        with self._lock:
+            if self._specimen is None:
+                return self.snapshot()
+            was_active = bool(self._specimen.get("active"))
+            self._specimen["active"] = False
+            if self._specimen.get("field_state") != "nullified":
+                self._specimen["field_state"] = "terminated"
+                self._specimen["status_note"] = "Laboratory Notebook field terminated."
+            record = {
+                "event": "terminate",
+                "specimen_id": self._specimen["specimen_id"],
+                "profile_id": self._specimen["profile_id"],
+                "pulses": self._specimen["pulses"],
+                "was_active": was_active,
+            }
+            self._specimen_history.append(record)
+            self._record("specimen", "Drakken specimen field terminated", record)
+            return self.snapshot()
+
+    def _next_specimen_cell(self, specimen: dict[str, Any], pulse: int) -> tuple[int, int]:
+        origin_row = int(specimen["origin"]["row"])
+        origin_col = int(specimen["origin"]["col"])
+        movement = str(specimen["movement"])
+        if movement == "radial":
+            arms = ((0, 1), (1, 1), (1, 0), (0, -1), (-1, -1), (-1, 0))
+            arm = arms[(pulse - 1) % len(arms)]
+            distance = 1 + (pulse - 1) // len(arms)
+            row = origin_row + arm[0] * distance
+            col = origin_col + arm[1] * distance
+        elif movement == "serpentine":
+            row = origin_row + (-2, -1, 0, 1, 2, 1, 0, -1)[(pulse - 1) % 8]
+            col = origin_col + pulse * 2
+        elif movement == "hound":
+            row = origin_row + (-1, -2, -1, 1, 2, 1)[(pulse - 1) % 6]
+            col = origin_col + pulse * 3
+        elif movement == "spiral":
+            angle = pulse * 0.78
+            radius = 2.0 + pulse * 0.42
+            row = origin_row + int(round(math.sin(angle) * radius * 0.55))
+            col = origin_col + int(round(math.cos(angle) * radius))
+        else:
+            angle = pulse * 0.52
+            radius = 3.0 + min(8.0, pulse * 0.18)
+            row = origin_row + int(round(math.sin(angle) * radius * 0.62))
+            col = origin_col + int(round(math.cos(angle) * radius))
+        return int(_clamp(float(row), 0.0, LAB_ROWS - 1.0)), int(col % LAB_COLS)
+
+    def _specimen_emissions(
+        self,
+        specimen: dict[str, Any],
+        row: int,
+        col: int,
+        pulse: int,
+    ) -> tuple[list[MacroEmission], dict[str, float]]:
+        phenotype = specimen["phenotype"]
+        profile_id = specimen["profile_id"]
+        if profile_id == "fault_tongue":
+            offsets = ((0, 0, 1.0), (0, 1, 0.72), (1, 1, 0.58), (1, 0, 0.72), (0, -1, 0.72), (-1, -1, 0.58), (-1, 0, 0.72))
+        elif profile_id == "tremorhound":
+            offsets = ((0, 0, 1.0), (0, -1, 0.65), (0, -2, 0.38), (1, -1, 0.28), (-1, -1, 0.28))
+        elif profile_id == "vortenbray":
+            offsets = ((0, 0, 1.0), (0, 1, 0.52), (0, -1, 0.52), (1, 0, 0.52), (-1, 0, 0.52), (1, 1, 0.28), (-1, -1, 0.28))
+        else:
+            offsets = ((0, 0, 1.0), (0, 1, 0.48), (0, -1, 0.48), (1, 0, 0.36), (-1, 0, 0.36))
+
+        emissions: list[MacroEmission] = []
+        totals = {"thermal_j": 0.0, "elevation_m": 0.0, "stress_pa": 0.0, "pressure_pa": 0.0, "co2_fraction": 0.0}
+        sequence = 0
+        pulse_mod = 0.88 + 0.12 * math.sin(pulse * 0.83)
+        for drow, dcol, weight in offsets:
+            target_row = int(_clamp(float(row + drow), 0.0, LAB_ROWS - 1.0))
+            target_col = int((col + dcol) % LAB_COLS)
+            scale = weight * pulse_mod
+            thermal_j = float(phenotype["thermal"]) * 3.0e13 * scale
+            elevation_m = float(phenotype["elevation"]) * 165.0 * scale
+            stress_pa = float(phenotype["stress"]) * 7.5e7 * scale
+            pressure_pa = float(phenotype["pressure"]) * 7_500.0 * scale
+            co2_fraction = float(phenotype["co2"]) * 2.5e-4 * scale
+            if pressure_pa < 0:
+                local_pressure = float(self.engine.atmosphere.pressure_pa[0, target_row, target_col])
+                pressure_pa = max(pressure_pa, -0.22 * local_pressure)
+
+            def emit(channel: str, args: tuple[Decimal | str, ...]) -> None:
+                nonlocal sequence
+                sequence += 1
+                emissions.append(MacroEmission(sequence=sequence, channel=channel, args=args))
+
+            if abs(thermal_j) > 1e-12:
+                emit("THERMAL_ENERGY", (Decimal(0), Decimal(target_row), Decimal(target_col), Decimal(str(thermal_j))))
+                totals["thermal_j"] += thermal_j
+            if abs(elevation_m) > 1e-12:
+                emit("LITHO_ELEVATION", (Decimal(0), Decimal(target_row), Decimal(target_col), Decimal(str(elevation_m))))
+                totals["elevation_m"] += elevation_m
+            if abs(stress_pa) > 1e-12:
+                emit("LITHO_STRESS", (Decimal(0), Decimal(target_row), Decimal(target_col), Decimal(str(stress_pa))))
+                totals["stress_pa"] += stress_pa
+            if abs(pressure_pa) > 1e-12:
+                emit("ATMOS_PRESSURE", (Decimal(0), Decimal(target_row), Decimal(target_col), Decimal(str(pressure_pa))))
+                totals["pressure_pa"] += pressure_pa
+            if co2_fraction > 1e-12:
+                emit("ATMOS_GAS", ("co2", Decimal(0), Decimal(target_row), Decimal(target_col), Decimal(str(co2_fraction))))
+                totals["co2_fraction"] += co2_fraction
+        return emissions, totals
 
     # ------------------------------------------------------------------
     # Telemetry

@@ -100,6 +100,16 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
                     nodes=int(data.get("nodes", 12)),
                     capacity_m_s2=float(data.get("capacity_m_s2", 0.05)),
                 ),
+                "/api/specimen/hatch": lambda data: self.server.session.hatch_specimen(
+                    profile_id=str(data.get("profile_id", "experimental_egg")),
+                    row=int(data.get("row", 18)),
+                    col=int(data.get("col", 36)),
+                    phenotype=(data.get("phenotype") if isinstance(data.get("phenotype"), dict) else None),
+                ),
+                "/api/specimen/pulse": lambda data: self.server.session.pulse_specimen(
+                    steps=int(data.get("steps", 1)),
+                ),
+                "/api/specimen/terminate": lambda _: self.server.session.terminate_specimen(),
             }
             action = routes.get(path)
             if action is None:
@@ -162,7 +172,19 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             ".js": "text/javascript; charset=utf-8",
             ".svg": "image/svg+xml; charset=utf-8",
         }
-        payload = candidate.read_bytes()
+        if relative == "index.html":
+            text = candidate.read_text(encoding="utf-8")
+            text = text.replace(
+                '<link rel="stylesheet" href="/static/styles.css">',
+                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">',
+            )
+            text = text.replace(
+                '<script src="/static/app.js"></script>',
+                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>',
+            )
+            payload = text.encode("utf-8")
+        else:
+            payload = candidate.read_bytes()
         self.send_response(HTTPStatus.OK)
         self.send_header("Content-Type", content_types.get(suffix, "application/octet-stream"))
         self.send_header("Content-Length", str(len(payload)))

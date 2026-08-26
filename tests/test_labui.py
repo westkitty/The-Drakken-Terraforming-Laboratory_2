@@ -103,6 +103,13 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert status == 200
         assert "text/html" in content_type
         assert b"Planetary Transformation Workbench" in html
+        assert b"/static/incubator.css" in html
+        assert b"/static/incubator.js" in html
+
+        status, content_type, plugin = _request(port, "GET", "/static/incubator.js")
+        assert status == 200
+        assert "text/javascript" in content_type
+        assert b"Drakken Egg & Specimen Incubator" in plugin
 
         status, content_type, raw = _request(port, "GET", "/api/state")
         assert status == 200
@@ -123,3 +130,99 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         server.shutdown()
         server.server_close()
         thread.join(timeout=2)
+
+
+def test_specimen_catalog_exposes_canon_locked_archive_models_and_lab_egg() -> None:
+    session = LaboratorySession()
+    catalog = session.snapshot()["specimens"]["catalog"]
+    ids = [item["profile_id"] for item in catalog]
+    assert ids == ["fault_tongue", "obsidian_gul", "tremorhound", "vortenbray", "experimental_egg"]
+    assert catalog[-1]["classification"] == "LAB MODEL — NON-CANON DESIGNATION"
+
+
+def test_fault_tongue_specimen_pulses_mutate_planet_deterministically() -> None:
+    first = LaboratorySession()
+    second = LaboratorySession()
+    before = first.snapshot()["planet"]["state_hash"]
+    first.hatch_specimen(profile_id="fault_tongue", row=18, col=36)
+    second.hatch_specimen(profile_id="fault_tongue", row=18, col=36)
+    state_a = first.pulse_specimen(steps=7)
+    state_b = second.pulse_specimen(steps=7)
+    assert state_a["planet"]["state_hash"] != before
+    assert state_a["planet"]["state_hash"] == state_b["planet"]["state_hash"]
+    specimen = state_a["specimens"]["active"]
+    assert specimen["pulses"] == 7
+    assert specimen["effect_totals"]["stress_pa"] > 0
+    assert len(specimen["trail"]) == 8
+
+
+def test_experimental_egg_accepts_tuned_phenotype_but_archive_profiles_are_locked() -> None:
+    session = LaboratorySession()
+    tuned = session.hatch_specimen(
+        profile_id="experimental_egg",
+        row=12,
+        col=24,
+        phenotype={"thermal": 0.8, "elevation": -0.4, "stress": 0.6, "pressure": 0.1, "co2": 0.0},
+    )
+    phenotype = tuned["specimens"]["active"]["phenotype"]
+    assert phenotype["thermal"] == 0.8
+    assert phenotype["elevation"] == -0.4
+    session.terminate_specimen()
+    with pytest.raises(ValueError, match="archive phenotype models are locked"):
+        session.hatch_specimen(
+            profile_id="obsidian_gul",
+            row=12,
+            col=24,
+            phenotype={"thermal": 0.1},
+        )
+
+
+def test_syrin_contact_nullifies_active_specimen_notebook_field() -> None:
+    session = LaboratorySession()
+    session.hatch_specimen(profile_id="vortenbray", row=18, col=36)
+    state = session.inject_syrin(contact_fraction=1e-18)
+    specimen = state["specimens"]["active"]
+    assert specimen["active"] is False
+    assert specimen["field_state"] == "nullified"
+    assert "physical specimen state is not inferred" in specimen["status_note"]
+    with pytest.raises(DrakkenLabError, match="inert"):
+        session.pulse_specimen(steps=1)
+
+
+def test_local_server_specimen_api_hatches_and_pulses_shared_planet() -> None:
+    server = make_server("127.0.0.1", 0)
+    port = server.server_address[1]
+    thread = Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        status, _, raw = _request(
+            port,
+            "POST",
+            "/api/specimen/hatch",
+            {"profile_id": "tremorhound", "row": 18, "col": 36},
+        )
+        assert status == 200
+        hatched = json.loads(raw)
+        before = hatched["planet"]["state_hash"]
+        assert hatched["specimens"]["active"]["name"] == "Tremorhound"
+
+        status, _, raw = _request(port, "POST", "/api/specimen/pulse", {"steps": 3})
+        assert status == 200
+        pulsed = json.loads(raw)
+        assert pulsed["specimens"]["active"]["pulses"] == 3
+        assert pulsed["planet"]["state_hash"] != before
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
+
+
+@pytest.mark.parametrize("profile_id", ["fault_tongue", "obsidian_gul", "tremorhound", "vortenbray", "experimental_egg"])
+def test_every_specimen_profile_survives_24_deterministic_pulses(profile_id: str) -> None:
+    session = LaboratorySession()
+    session.hatch_specimen(profile_id=profile_id, row=18, col=36)
+    state = session.pulse_specimen(steps=24)
+    specimen = state["specimens"]["active"]
+    assert specimen["pulses"] == 24
+    assert len(specimen["trail"]) == 25
+    assert state["planet"]["state_hash"]
