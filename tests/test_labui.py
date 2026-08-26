@@ -107,6 +107,8 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert b"/static/incubator.js" in html
         assert b"/static/command-center.css" in html
         assert b"/static/command-center.js" in html
+        assert b"/static/state-transitions.css" in html
+        assert b"/static/state-transitions.js" in html
 
         status, content_type, plugin = _request(port, "GET", "/static/incubator.js")
         assert status == 200
@@ -118,6 +120,20 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert "text/javascript" in content_type
         assert b"Command-center renderer" in command_center
         assert b"CanvasGlobeRenderer" in command_center
+
+        status, content_type, transition_js = _request(port, "GET", "/static/state-transitions.js")
+        assert status == 200
+        assert "text/javascript" in content_type
+        assert b"State Transition Director" in transition_js
+        assert b"ABSOLUTE NULLIFICATION" in transition_js
+        assert b"HELIOCIDE" in transition_js
+        assert b"CONTAINMENT FRACTURE" in transition_js
+
+        status, content_type, transition_css = _request(port, "GET", "/static/state-transitions.css")
+        assert status == 200
+        assert "text/css" in content_type
+        assert b"cc-fx-heliocide" in transition_css
+        assert b"cc-fx-nullification" in transition_css
 
         status, content_type, raw = _request(port, "GET", "/api/state")
         assert status == 200

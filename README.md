@@ -8,7 +8,7 @@ This repository treats the supplied Starsilk mechanics as literal simulation inv
 
 `drakken-lab dashboard` is the product interface. It starts a loopback-only local server and opens the graphical command-center workbench; terminal reports remain a developer/diagnostic path under `drakken-lab report`. No Node, Vite, Docker, cloud service, account, or network runtime is required after the Python package is installed.
 
-### v1.3 command-center presentation
+### v1.4 command-center presentation and visible state transitions
 
 The v1.3 interface is the real application, not concept art. The validated v1.2 controls remain intact underneath a new cinematic presentation layer:
 
@@ -17,6 +17,19 @@ The v1.3 interface is the real application, not concept art. The validated v1.2 
 - real lithospheric stress exposed from the solver and rendered as orange fracture energy rather than decorative effects;
 - shared planetary state across the Planet, Macro, and Incubator stations, so mutations remain visible wherever the globe appears;
 - graceful fallback without changing simulation behavior if WebGL2 is disabled.
+
+
+The v1.4 presentation layer adds a **State Transition Director**. It observes state only after the authoritative backend commits a mutation and renders a corresponding transition without changing physics:
+
+- **Heliocide** — the stellar monitor visibly implodes from luminous core to a persistent event-horizon/lensing state while the command deck registers the hard zero-Starsilk transition.
+- **Syrin nullification** — active Starsilk color drains out of the laboratory, red nullification scans cross the interface, field stability drops to `NULLIFIED`, and the inert state remains visible until full reset.
+- **Planetary interventions** — Heat, Cool, Uplift, Fracture, Pressure, and CO₂ commits generate distinct solver-backed impact graphics at the actual target cell.
+- **Macro execution** — each committed reality-loop instruction produces an execution transition; emitted grid commands also appear as visible impacts on the shared planet.
+- **Starbinding** — committed vectors visibly traverse the bench, distinguish misses from intersections, and produce a collapse shock when a hit removes the final Starsilk.
+- **Siege Wall** — stable solves lock in with containment rings; node-capacity failure becomes a persistent fractured state with a visible rupture transition.
+- **Drakken Notebook fields** — hatch, pulse, and termination transitions are visible; Fault-Tongue, Obsidian Gul, Tremorhound, Vortenbray, and Experimental Egg use distinct animated field signatures.
+
+A compact transition readout in the command deck reports the latest authoritative change. These animations are presentation-only and never enter deterministic state hashes.
 
 The workbench contains six live stations:
 
@@ -80,6 +93,8 @@ By default the laboratory binds only to `127.0.0.1:8765`. If that port is occupi
 │   │       ├── app.js
 │   │       ├── command-center.css
 │   │       ├── command-center.js
+│   │       ├── state-transitions.css
+│   │       ├── state-transitions.js
 │   │       ├── incubator.css
 │   │       ├── incubator.js
 │   │       ├── index.html

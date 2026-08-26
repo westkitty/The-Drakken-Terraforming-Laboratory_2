@@ -176,11 +176,11 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             text = candidate.read_text(encoding="utf-8")
             text = text.replace(
                 '<link rel="stylesheet" href="/static/styles.css">',
-                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">',
+                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">',
             )
             text = text.replace(
                 '<script src="/static/app.js"></script>',
-                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>',
+                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>',
             )
             payload = text.encode("utf-8")
         else:
