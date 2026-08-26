@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drakken-terraforming-laboratory"
+version = "1.0.0"
+description = "Deterministic Starsilk macro and planetary transformation laboratory."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "Stinky Weasel Productions"}]
+dependencies = [
+  "numpy>=2.0,<3.0",
+  "rich>=13.7,<15.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0,<9.0",
+]
+
+[project.scripts]
+drakken-lab = "cli.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["core*", "sim*", "scenarios*", "cli*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
