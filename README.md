@@ -75,6 +75,8 @@ Syrin contact nullifies the specimen's active Notebook Starsilk field. The labor
 │   │   ├── specimens.py
 │   │   └── static
 │   │       ├── app.js
+│   │       ├── incubator.css
+│   │       ├── incubator.js
 │   │       ├── index.html
 │   │       └── styles.css
 │   ├── scenarios
