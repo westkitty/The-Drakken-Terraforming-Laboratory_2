@@ -107,6 +107,8 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert b"/static/incubator.js" in html
         assert b"/static/command-center.css" in html
         assert b"/static/command-center.js" in html
+        assert b"/static/display-first.css" in html
+        assert b"/static/display-first.js" in html
         assert b"/static/state-transitions.css" in html
         assert b"/static/state-transitions.js" in html
 
@@ -120,6 +122,19 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert "text/javascript" in content_type
         assert b"Command-center renderer" in command_center
         assert b"CanvasGlobeRenderer" in command_center
+
+        status, content_type, display_first = _request(port, "GET", "/static/display-first.js")
+        assert status == 200
+        assert "text/javascript" in content_type
+        assert b"Display-first command shell" in display_first
+        assert b"PHENOTYPE ARCHIVE" in display_first
+        assert b"TERRAFORMING CONTROLS" in display_first
+
+        status, content_type, display_first_css = _request(port, "GET", "/static/display-first.css")
+        assert status == 200
+        assert "text/css" in content_type
+        assert b"df-drawer-left" in display_first_css
+        assert b"grid-template-columns:var(--df-rail)" in display_first_css
 
         status, content_type, transition_js = _request(port, "GET", "/static/state-transitions.js")
         assert status == 200

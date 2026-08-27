@@ -1,7 +1,41 @@
 # Validation and Requirement Traceability
 
 Validation date: 2026-08-26  
-Repository version: 1.4.0
+Repository version: 1.5.0
+
+## v1.5 product change under test
+
+v1.5 is a layout/interaction pass over the validated v1.4 command center. Its controlling requirement is **display first, controls on demand**: the simulation surface must occupy the default viewport while station controls remain reachable from overlay drawers without resizing the display.
+
+The new `display-first.js` re-homes existing live DOM controls after their original event handlers are attached. It does not replace buttons with facsimiles and does not create a second state model. The corresponding `display-first.css` turns those controls into left, right, and bottom overlay drawers, compacts the persistent navigation/top/status chrome, and enlarges the central simulation stage.
+
+### v1.5 acceptance checks
+
+| Check | Evidence | Result |
+|---|---|---|
+| Full deterministic Python suite | `PYTHONPATH=src pytest -q` | PASS — 46 tests |
+| Python compilation | `PYTHONPATH=src python -m compileall -q src` | PASS |
+| JavaScript syntax | `node --check` on all shipped JS including `display-first.js` | PASS |
+| Display-first assets served | HTTP integration test asserts injected CSS/JS and retrieves both static routes | PASS |
+| Existing controls preserved | drawer layer moves existing DOM nodes after original listeners are installed; backend API paths unchanged | PASS by implementation + regression |
+| Default drawer state | every drawer is created closed; no station opens a drawer during initialization | PASS by source invariant |
+| Overlay, not resize | drawers are `position:absolute` overlays inside each station and central layouts are reduced to one full-size display column | PASS by CSS invariant |
+| Keyboard dismissal/navigation | `Escape` closes drawers; `[`, `]`, `\`, and `H` control left/right/bottom/HUD outside text inputs | PASS by source invariant |
+| State transitions remain independent | v1.4 transition director loads before display-first shell and continues to observe authoritative mutation pipeline | PASS by load order |
+| Browser automation in this execution environment | local Playwright/Chromium launch did not complete in this container | NOT CLAIMED — no fabricated screenshot evidence |
+| Wheel build | `python -m pip wheel . --no-deps --no-build-isolation` | PASS |
+| Wheel contains display-first assets | ZIP inspection of built wheel | PASS |
+| Isolated wheel import/assets | `pip install --target` + `LaboratorySession` import + static asset checks | PASS |
+
+Final v1.5 wheel SHA-256: `adc70cc8e468ee4b4b81d7190eb2dbc5fc15c7f795c46170eb8bf0967556b1cf`.
+
+The existing v1.4 browser transition evidence below remains evidence for the transition layer itself. v1.5 changes layout and control presentation; it does not alter simulation physics or transition semantics.
+
+---
+
+## Historical v1.4 transition validation
+Validation date: 2026-08-26  
+Historical validated release: 1.4.0
 
 ## Product change under test
 

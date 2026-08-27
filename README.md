@@ -8,6 +8,20 @@ This repository treats the supplied Starsilk mechanics as literal simulation inv
 
 `drakken-lab dashboard` is the product interface. It starts a loopback-only local server and opens the graphical command-center workbench; terminal reports remain a developer/diagnostic path under `drakken-lab report`. No Node, Vite, Docker, cloud service, account, or network runtime is required after the Python package is installed.
 
+### v1.5 display-first interaction shell
+
+v1.5 changes the default composition from **dashboard-first** to **display-first**. The live simulation now owns almost the entire viewport; detailed controls are edge drawers that overlay the scene instead of permanently shrinking it.
+
+- the left navigation rail is reduced to an icon-only station switcher;
+- station-specific tools slide in from the **left edge** (`[`), telemetry/dossiers slide in from the **right edge** (`]`), and execution controls rise from the **bottom edge** (`\`);
+- drawers are closed by default and never resize the authoritative visualization when opened;
+- clicking the active display or pressing `Escape` dismisses open drawers;
+- `H` toggles the optional floating HUD instruments while the core globe/status presentation remains visible;
+- Planet, Incubator, Macro, Starbinding, Siege Wall, and Telemetry all use the same edge-drawer interaction language;
+- the central globe/projector stage expands to the freed space, while v1.4 state-transition effects remain visible with the control drawers closed.
+
+This deliberately follows scene-dominant scientific visualization interfaces: the rendered system remains primary and configuration appears on demand rather than occupying permanent columns.
+
 ### v1.4 command-center presentation and visible state transitions
 
 The v1.3 interface is the real application, not concept art. The validated v1.2 controls remain intact underneath a new cinematic presentation layer:
@@ -93,6 +107,8 @@ By default the laboratory binds only to `127.0.0.1:8765`. If that port is occupi
 │   │       ├── app.js
 │   │       ├── command-center.css
 │   │       ├── command-center.js
+│   │       ├── display-first.css
+│   │       ├── display-first.js
 │   │       ├── state-transitions.css
 │   │       ├── state-transitions.js
 │   │       ├── incubator.css
