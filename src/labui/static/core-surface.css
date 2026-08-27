@@ -1,13 +1,12 @@
-/* v1.8.3 guaranteed Station 01 visual surface. */
+/* v1.8.4 guaranteed Station 01 visual surface. */
 .command-center .planet-canvas-wrap{position:relative!important;isolation:isolate}
 .core-space-surface,.core-planet-surface{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;visibility:visible!important;pointer-events:none!important;transform-origin:50% 49%}
-.core-space-surface{z-index:3!important;opacity:1!important;background:#000205}
+.core-space-surface{z-index:1!important;opacity:1!important;background:#000205}
 .core-planet-surface{z-index:4!important;opacity:1!important;background:transparent!important}
 /* The old canvas is retained only as the proven pointer/gesture hit surface. Its stale bitmap must never cover the guaranteed renderer. */
 .command-center #planet-canvas{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;display:block!important;visibility:visible!important;opacity:.001!important;z-index:5!important;pointer-events:auto!important;background:transparent!important}
 .interaction-v16 #view-planet .core-space-surface,.interaction-v16 #view-planet .core-planet-surface{transform:scale(var(--ir-zoom,1));transition:transform .22s cubic-bezier(.2,.8,.2,1)}
-/* CSS-only emergency body: visible until the JS core surface paints its first frame. */
+/* CSS-only emergency body: permanently retained below the rendered planet so no JS lifecycle can blank the stage. */
 .command-center .planet-canvas-wrap::before{content:"";position:absolute;z-index:3;left:50%;top:49%;width:min(66vh,58vw);max-width:680px;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;opacity:1;background:radial-gradient(circle at 34% 29%,rgba(139,235,238,.92) 0 2%,rgba(65,157,165,.92) 13%,rgba(25,83,99,.96) 41%,rgba(8,30,43,.99) 70%,#01060b 100%);box-shadow:0 0 2px rgba(137,247,255,.85),0 0 35px rgba(53,232,255,.20),0 0 100px rgba(22,126,164,.12);transition:opacity .18s ease}
-.command-center .planet-canvas-wrap.core-render-live::before{opacity:0}
 @media(max-width:720px){.command-center .planet-canvas-wrap::before{width:min(64vh,78vw)}}
 @media(prefers-reduced-motion:reduce){.core-space-surface,.core-planet-surface,.command-center .planet-canvas-wrap::before{transition:none!important}}
