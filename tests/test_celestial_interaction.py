@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from http.client import HTTPConnection
 from threading import Thread
 
@@ -61,3 +63,13 @@ def test_v18_orbital_scene_is_interactive_and_state_bound() -> None:
         server.shutdown()
         server.server_close()
         thread.join(timeout=2)
+
+
+def test_fallback_globe_remains_visible_under_celestial_enhancement() -> None:
+    root = Path(__file__).parents[1]
+    css = (root / "src/labui/static/system-view.css").read_text(encoding="utf-8")
+    assert ".v17-celestial-ready>#planet-canvas" in css
+    assert ".v17-celestial-ready>.cc-globe-layer" in css
+    assert "opacity:1!important;visibility:visible!important" in css
+    assert "opacity:0!important" not in css
+    assert "HARD INVARIANT" in css
