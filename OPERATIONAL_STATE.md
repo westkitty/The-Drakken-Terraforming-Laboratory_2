@@ -6,12 +6,12 @@
   "project_name": "The Drakken Terraforming Laboratory",
   "project_root": "/mnt/data/drakken-terraforming-laboratory",
   "artifact_path": "",
-  "state_revision": 2,
-  "last_updated": "2026-08-26T11:59:02Z",
+  "state_revision": 3,
+  "last_updated": "2026-08-27T02:45:38Z",
   "current_baseline": {
-    "identity": "repository v1.0.0 / validated wheel",
-    "state": "verified",
-    "last_verified": "2026-08-26T11:59:02Z"
+    "identity": "repository v1.8.3 / guaranteed Planet surface",
+    "state": "implemented-unverified",
+    "last_verified": null
   },
   "scope_boundaries": [
     "Deterministic computational Starsilk, stellar, terraforming, lattice, scenario, CLI, and test repository",
@@ -94,16 +94,32 @@ Deliver a complete executable repository with the user-requested source layout, 
 <!-- /operational-state:entry -->
 
 ## 6. Known Not Working
-None known in the verified baseline.
+<!-- operational-state:entry
+{"id":"BKN-001","title":"Planet visualization absent on user macOS path through v1.8.2","state":"failed","capability":"Station 01 should visibly render the planet and celestial environment.","scope":"browser UI / Planet station","evidence":"User-provided macOS screenshot on 2026-08-26 shows shell/state/controls loaded while the visualization stage remains blank.","last_checked":"2026-08-26","status":"active","recheck_trigger":"User visually confirms v1.8.3 or later on the same Mac browser path"}
+-->
+### BKN-001 — Planet visualization absent on user macOS path through v1.8.2
+- **State:** `failed`
+- **Capability:** Station 01 should visibly render the planet and celestial environment.
+- **Evidence:** User-provided macOS screenshot shows the shell, state, hash, and controls loaded while the visualization stage remains blank.
+- **Status:** active until the repaired user path is visually confirmed.
+<!-- /operational-state:entry -->
 
 ## 7. Implemented but Unverified
-None.
+<!-- operational-state:entry
+{"id":"IMP-001","title":"Guaranteed independent Planet render surface","state":"implemented-unverified","capability":"A core space canvas and core planet canvas are created inside the confirmed-visible stage, while the old canvas remains interaction-only; a CSS fallback sphere remains visible until the first successful core frame.","scope":"browser UI / Planet station","evidence":"53-test suite, Python compile, JS parse, asset-order regression tests; exact macOS pixels still pending.","artifact_revision":"v1.8.3","last_checked":"2026-08-27T02:45:38Z","status":"active","recheck_trigger":"Visual confirmation on the user macOS browser path"}
+-->
+### IMP-001 — Guaranteed independent Planet render surface
+- **State:** `implemented-unverified`
+- **Capability:** Separate core space/planet canvases render inside the confirmed-visible stage; the legacy canvas is interaction-only; a CSS fallback sphere exists before JS success.
+- **Evidence:** 53 passing tests, Python compilation, JS syntax checks, served-asset and load-order guards.
+- **Artifact revision:** v1.8.3
+<!-- /operational-state:entry -->
 
 ## 8. Unknown or Evidence-Stale State
 Exact bitwise floating-point identity across different CPU architectures and different NumPy builds was not claimed. Determinism is verified under the supported single-process update path and strongest when Python/NumPy versions are pinned identically.
 
 ## 9. Pending Work
-None blocking delivery.
+- Visually confirm v1.8.3 on the same user macOS browser path that demonstrated BKN-001 before promoting the Planet display to verified.
 
 ## 10. Active Decisions, Defaults, and Prohibitions
 - Python 3.11+ with NumPy and Rich.
@@ -125,5 +141,6 @@ None blocking delivery.
 Initial creation is complete. Future changes must preserve INV-001 through INV-003 and rerun the checks listed in the matrix for their impact radius.
 
 ## 13. Compact Revision Log
+- **Revision 3 — 2026-08-27:** Recorded the v1.8.2 macOS blank Planet viewport as BKN-001 and v1.8.3 independent core rendering as implemented-unverified pending same-path visual confirmation.
 - **Revision 2 — 2026-08-26:** Promoted v1.0.0 to verified after 27 passing tests, compile/placeholder checks, CLI scenario/dashboard smokes, wheel build/metadata inspection, packaged-code execution, and one bounded hygiene/edge-semantics hardening pass.
 - **Revision 1 — 2026-08-26:** Bootstrapped project state for the initial complete repository build. Validation pending.
