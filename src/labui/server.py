@@ -16,6 +16,7 @@ from .session import LaboratorySession
 
 STATIC_ROOT = Path(__file__).with_name("static")
 MAX_REQUEST_BYTES = 1_000_000
+LAB_UI_BUILD = "1.8.6-svg-base"
 
 
 class LaboratoryHTTPServer(ThreadingHTTPServer):
@@ -37,7 +38,7 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 - stdlib hook name
         path = urlparse(self.path).path
         if path == "/api/health":
-            self._json({"ok": True, "product": "The Drakken Terraforming Laboratory"})
+            self._json({"ok": True, "product": "The Drakken Terraforming Laboratory", "version": "1.8.6", "ui_build": LAB_UI_BUILD})
             return
         if path == "/api/state":
             self._json(self.server.session.snapshot())
@@ -176,11 +177,21 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             text = candidate.read_text(encoding="utf-8")
             text = text.replace(
                 '<link rel="stylesheet" href="/static/styles.css">',
-                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">\n  <link rel="stylesheet" href="/static/core-surface.css">',
+                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">\n  <link rel="stylesheet" href="/static/core-surface.css">\n  <link rel="stylesheet" href="/static/planet-safe.css">',
             )
             text = text.replace(
                 '<script src="/static/app.js"></script>',
-                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>\n  <script src="/static/display-first.js"></script>\n  <script src="/static/core-surface.js"></script>\n  <script src="/static/system-view.js"></script>\n  <script src="/static/celestial-interaction.js"></script>',
+                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>\n  <script src="/static/display-first.js"></script>\n  <script src="/static/core-surface.js"></script>\n  <script src="/static/system-view.js"></script>\n  <script src="/static/celestial-interaction.js"></script>\n  <script src="/static/planet-safe.js"></script>',
+            )
+            text = text.replace(
+                '<div class="eyebrow">DRAKKEN SYSTEMS // LOCAL COMPUTATIONAL FACILITY</div>',
+                '<div class="eyebrow">DRAKKEN SYSTEMS // LOCAL COMPUTATIONAL FACILITY // v1.8.6</div>',
+            )
+            text = text.replace(
+                '<canvas id="planet-canvas" aria-label="Interactive planetary simulation"></canvas>',
+                '<img id="planet-static-scene" class="planet-static-scene" src="/static/planet-base.svg" alt="" aria-hidden="true">\n'
+                '                <div id="planet-render-identity" class="planet-render-identity" data-build="1.8.6">SCENE 1.8.6 // SVG BASE</div>\n'
+                '                <canvas id="planet-canvas" aria-label="Interactive planetary simulation"></canvas>',
             )
             payload = text.encode("utf-8")
         else:
@@ -202,25 +213,23 @@ def make_server(host: str = "127.0.0.1", port: int = 8765, *, session: Laborator
 def launch_laboratory(*, host: str = "127.0.0.1", port: int = 8765, open_browser: bool = True) -> int:
     """Start the local workbench and serve until interrupted.
 
-    The default bind address is loopback-only. If the requested port is occupied,
-    the launcher searches the next ten ports rather than killing an unrelated
-    process.
+    The requested port is exact. The launcher deliberately refuses to hop to a
+    different port when one is occupied because multiple simultaneous laboratory
+    servers can leave an existing browser tab attached to an older build.
     """
-    server: LaboratoryHTTPServer | None = None
-    last_error: OSError | None = None
-    for candidate in range(port, port + 11):
-        try:
-            server = make_server(host, candidate)
-            break
-        except OSError as exc:
-            last_error = exc
-    if server is None:
-        assert last_error is not None
-        raise last_error
+    try:
+        server = make_server(host, port)
+    except OSError as exc:
+        print(f"Cannot start The Drakken Terraforming Laboratory on {host}:{port}: {exc}")
+        print("Refusing to start a second copy on another port; an older laboratory process may still be running.")
+        print("Stop the previous dashboard process (Ctrl-C in its terminal) or choose a different --port explicitly.")
+        return 2
 
     actual_port = int(server.server_address[1])
-    url = f"http://{host}:{actual_port}/"
+    url = f"http://{host}:{actual_port}/?build={LAB_UI_BUILD}"
     print(f"The Drakken Terraforming Laboratory: {url}")
+    print(f"UI build: {LAB_UI_BUILD}")
+    print(f"Static root: {STATIC_ROOT}")
     print("Press Ctrl-C in this terminal to stop the local laboratory server.")
     if open_browser:
         Timer(0.35, lambda: webbrowser.open(url, new=2)).start()
