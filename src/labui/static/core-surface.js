@@ -1,6 +1,6 @@
 "use strict";
 
-/* v1.8.3 Guaranteed Planet renderer.
+/* v1.8.4 Guaranteed Planet renderer.
    This is deliberately loaded immediately after the confirmed-working
    display-first shell. It owns only presentation. Authoritative state and all
    mutations remain in app.js / the Python session. */
@@ -71,7 +71,7 @@
     haze.addColorStop(0,"rgba(22,105,150,.10)"); haze.addColorStop(.5,"rgba(8,38,66,.025)"); haze.addColorStop(1,"rgba(0,0,0,0)");
     ctx.fillStyle=haze; ctx.fillRect(0,0,w,h);
 
-    const rotation = Number(globalThis.app?.planetRotation || 0);
+    const rotation = Number(app?.planetRotation || 0);
     for (const star of stars) {
       const parallax = 1.30 - star.depth;
       let x = star.x*w + (pointerX*34 + Math.sin(rotation)*18 + t*(star.layer+1)*.08)*parallax;
@@ -91,7 +91,7 @@
   function drawDistantSystem(ctx,w,h,t) {
     const compact=w<800,cx=w*(compact?.80:.835)+pointerX*8,cy=h*(compact?.19:.215)+pointerY*4;
     const sr=Math.max(7,Math.min(w,h)*(compact?.012:.015));
-    const state=globalThis.app?.state?.star;
+    const state=app?.state?.star;
     const collapsed=state?.state==="collapsed";
     const bond=clampLocal(Number(state?.bond_index ?? 1),0,1);
     if(collapsed){
@@ -125,35 +125,35 @@
   }
 
   function drawPlanet() {
-    if (!globalThis.app?.state) return false;
+    if (!app?.state) return false;
     const { ctx, w, h } = context(planet, 1.6);
     if (w < 8 || h < 8) return false;
     ctx.clearRect(0,0,w,h);
-    const geo = typeof globalThis.planetGeometry === "function" ? globalThis.planetGeometry(planet) : {cx:w*.5,cy:h*.49,radius:Math.max(90,Math.min(w,h)*.395)};
+    const geo = typeof planetGeometry === "function" ? planetGeometry(planet) : {cx:w*.5,cy:h*.49,radius:Math.max(90,Math.min(w,h)*.395)};
     const {cx,cy,radius}=geo;
     drawFallbackSphere(ctx,cx,cy,radius);
     const halo=ctx.createRadialGradient(cx,cy,radius*.82,cx,cy,radius*1.17);halo.addColorStop(0,"rgba(38,137,177,0)");halo.addColorStop(.72,"rgba(55,188,227,.025)");halo.addColorStop(.88,"rgba(75,217,255,.16)");halo.addColorStop(1,"rgba(75,217,255,0)");ctx.fillStyle=halo;ctx.beginPath();ctx.arc(cx,cy,radius*1.18,0,Math.PI*2);ctx.fill();
     try {
-      const state=globalThis.app.state,rows=state.planet.rows,cols=state.planet.cols,rot=Number(globalThis.app.planetRotation||0),cosR=Math.cos(rot),sinR=Math.sin(rot),step=radius>250?3:4;
-      for(let py=-radius;py<=radius;py+=step){const sy=-py/radius;for(let px=-radius;px<=radius;px+=step){const sx=px/radius,q=sx*sx+sy*sy;if(q>=1)continue;const sz=Math.sqrt(1-q),worldX=sx*cosR-sz*sinR,worldZ=sx*sinR+sz*cosR,lat=Math.asin(clampLocal(sy,-1,1)),lon=Math.atan2(worldZ,worldX);const row=clampLocal(Math.round(((lat+Math.PI/2)/Math.PI)*(rows-1)),0,rows-1);let col=Math.floor(((lon+Math.PI)/(2*Math.PI))*cols);col=((col%cols)+cols)%cols;ctx.fillStyle=typeof globalThis.colorForPlanet==="function"?globalThis.colorForPlanet(row,col,sz):"#256c73";ctx.fillRect(cx+px,cy+py,step+.8,step+.8);}}
-      ctx.save();ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.clip();const sheen=ctx.createLinearGradient(cx-radius,cy-radius,cx+radius,cy+radius);sheen.addColorStop(0,"rgba(220,248,255,.18)");sheen.addColorStop(.34,"rgba(255,255,255,.01)");sheen.addColorStop(.7,"rgba(0,0,0,.14)");sheen.addColorStop(1,"rgba(0,0,0,.64)");ctx.fillStyle=sheen;ctx.fillRect(cx-radius,cy-radius,radius*2,radius*2);if(typeof globalThis.drawStarsilkThreads==="function")globalThis.drawStarsilkThreads(ctx,cx,cy,radius);ctx.restore();
+      const state=app.state,rows=state.planet.rows,cols=state.planet.cols,rot=Number(app.planetRotation||0),cosR=Math.cos(rot),sinR=Math.sin(rot),step=radius>250?3:4;
+      for(let py=-radius;py<=radius;py+=step){const sy=-py/radius;for(let px=-radius;px<=radius;px+=step){const sx=px/radius,q=sx*sx+sy*sy;if(q>=1)continue;const sz=Math.sqrt(1-q),worldX=sx*cosR-sz*sinR,worldZ=sx*sinR+sz*cosR,lat=Math.asin(clampLocal(sy,-1,1)),lon=Math.atan2(worldZ,worldX);const row=clampLocal(Math.round(((lat+Math.PI/2)/Math.PI)*(rows-1)),0,rows-1);let col=Math.floor(((lon+Math.PI)/(2*Math.PI))*cols);col=((col%cols)+cols)%cols;ctx.fillStyle=typeof colorForPlanet==="function"?colorForPlanet(row,col,sz):"#256c73";ctx.fillRect(cx+px,cy+py,step+.8,step+.8);}}
+      ctx.save();ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.clip();const sheen=ctx.createLinearGradient(cx-radius,cy-radius,cx+radius,cy+radius);sheen.addColorStop(0,"rgba(220,248,255,.18)");sheen.addColorStop(.34,"rgba(255,255,255,.01)");sheen.addColorStop(.7,"rgba(0,0,0,.14)");sheen.addColorStop(1,"rgba(0,0,0,.64)");ctx.fillStyle=sheen;ctx.fillRect(cx-radius,cy-radius,radius*2,radius*2);if(typeof drawStarsilkThreads==="function")drawStarsilkThreads(ctx,cx,cy,radius);ctx.restore();
     } catch(error) {
       console.error("Guaranteed core planet map pass degraded to fallback sphere.",error);
     }
-    wrap.classList.add("core-render-live");
+    wrap.dataset.corePlanetFrame = "painted";
     return true;
   }
 
   function schedule() {
-    if (!globalThis.app?.state || globalThis.app.view !== "planet") return;
+    if (!app?.state || app.view !== "planet") return;
     if (redrawFrame) cancelAnimationFrame(redrawFrame);
     redrawFrame=requestAnimationFrame(()=>{redrawFrame=0;drawPlanet();});
   }
 
-  const previousRenderAll=globalThis.renderAll;
-  if(typeof previousRenderAll==="function") globalThis.renderAll=function coreSurfaceRenderAll(){previousRenderAll();schedule();};
-  const previousDrawActive=globalThis.drawActiveCanvases;
-  if(typeof previousDrawActive==="function") globalThis.drawActiveCanvases=function coreSurfaceDrawActive(){previousDrawActive();schedule();};
+  const previousRenderAll=renderAll;
+  if(typeof previousRenderAll==="function") renderAll=function coreSurfaceRenderAll(){previousRenderAll();schedule();};
+  const previousDrawActive=drawActiveCanvases;
+  if(typeof previousDrawActive==="function") drawActiveCanvases=function coreSurfaceDrawActive(){previousDrawActive();schedule();};
 
   if(typeof ResizeObserver==="function"){resizeObserver=new ResizeObserver(schedule);resizeObserver.observe(wrap);}
   wrap.addEventListener("pointermove",event=>{const r=wrap.getBoundingClientRect();if(r.width&&r.height){pointerX=((event.clientX-r.left)/r.width-.5)*2;pointerY=((event.clientY-r.top)/r.height-.5)*2;}schedule();},{passive:true});
@@ -163,7 +163,7 @@
   for(const ms of [0,40,160,500,1200])setTimeout(schedule,ms);
 
   function animate(time){
-    if(globalThis.app?.view==="planet" && time-lastSpaceFrame>33){lastSpaceFrame=time;try{drawSpace(time);}catch(error){console.error("Guaranteed space renderer failed.",error);}}
+    if(app?.view==="planet" && time-lastSpaceFrame>33){lastSpaceFrame=time;try{drawSpace(time);}catch(error){console.error("Guaranteed space renderer failed.",error);}}
     requestAnimationFrame(animate);
   }
   requestAnimationFrame(animate);
