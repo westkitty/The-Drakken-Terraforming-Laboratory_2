@@ -65,11 +65,12 @@ def test_v18_orbital_scene_is_interactive_and_state_bound() -> None:
         thread.join(timeout=2)
 
 
-def test_fallback_globe_remains_visible_under_celestial_enhancement() -> None:
-    root = Path(__file__).parents[1]
-    css = (root / "src/labui/static/system-view.css").read_text(encoding="utf-8")
-    assert ".v17-celestial-ready>#planet-canvas" in css
-    assert ".v17-celestial-ready>.cc-globe-layer" in css
-    assert "opacity:1!important;visibility:visible!important" in css
-    assert "opacity:0!important" not in css
-    assert "HARD INVARIANT" in css
+def test_planet_hit_canvas_is_not_promoted_back_to_opaque_by_celestial_layers() -> None:
+    root = Path(__file__).parents[1] / "src/labui/static"
+    system = (root / "system-view.css").read_text(encoding="utf-8")
+    celestial = (root / "celestial-interaction.css").read_text(encoding="utf-8")
+    core = (root / "core-surface.css").read_text(encoding="utf-8")
+    assert ".v17-celestial-ready>#planet-canvas" not in system
+    assert ".command-center #planet-canvas" not in celestial
+    assert ".planet-canvas-wrap>#planet-canvas{opacity:0!important" in core
+    assert ".v17-celestial-ready>.cc-globe-layer" in system
