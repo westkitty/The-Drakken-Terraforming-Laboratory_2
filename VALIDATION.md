@@ -1,135 +1,53 @@
 # Validation and Requirement Traceability
 
-Validation date: 2026-08-26  
-Repository version: 1.5.0
+Validation date: 2026-08-27  
+Repository version: 1.8.5
 
-## v1.5 product change under test
+## v1.8.5 single-owner Planet stacking repair
 
-v1.5 is a layout/interaction pass over the validated v1.4 command center. Its controlling requirement is **display first, controls on demand**: the simulation surface must occupy the default viewport while station controls remain reachable from overlay drawers without resizing the display.
+User evidence disproved v1.8.4: the same macOS path remained visually unchanged. The reload flash from v1.8.3/1.8.4 was traced through the full stylesheet cascade. `system-view.css` and `celestial-interaction.css` each contained historical rules that promoted `#planet-canvas` to `opacity:1 !important` after the guaranteed render surface initialized. That legacy canvas carries the original opaque black frame and sat above the replacement scene, so it blanketed the fallback sphere, starfield, rendered planet, projector effects, and low-level HUD layers.
 
-The new `display-first.js` re-homes existing live DOM controls after their original event handlers are attached. It does not replace buttons with facsimiles and does not create a second state model. The corresponding `display-first.css` turns those controls into left, right, and bottom overlay drawers, compacts the persistent navigation/top/status chrome, and enlarges the central simulation stage.
-
-### v1.5 acceptance checks
+The repair removes both opacity promotions, serves `core-surface.css` last, sets the legacy canvas to `opacity:0 !important` using an inline contract, and disables the duplicate command-center/v1.7 globe canvases on Station 01. The old canvas remains pointer-active for the established direct-manipulation event handlers.
 
 | Check | Evidence | Result |
 |---|---|---|
-| Full deterministic Python suite | `PYTHONPATH=src pytest -q` | PASS — 46 tests |
+| Full deterministic Python suite | `PYTHONPATH=src pytest -q` | PASS — 58 tests |
 | Python compilation | `PYTHONPATH=src python -m compileall -q src` | PASS |
-| JavaScript syntax | `node --check` on all shipped JS including `display-first.js` | PASS |
-| Display-first assets served | HTTP integration test asserts injected CSS/JS and retrieves both static routes | PASS |
-| Existing controls preserved | drawer layer moves existing DOM nodes after original listeners are installed; backend API paths unchanged | PASS by implementation + regression |
-| Default drawer state | every drawer is created closed; no station opens a drawer during initialization | PASS by source invariant |
-| Overlay, not resize | drawers are `position:absolute` overlays inside each station and central layouts are reduced to one full-size display column | PASS by CSS invariant |
-| Keyboard dismissal/navigation | `Escape` closes drawers; `[`, `]`, `\`, and `H` control left/right/bottom/HUD outside text inputs | PASS by source invariant |
-| State transitions remain independent | v1.4 transition director loads before display-first shell and continues to observe authoritative mutation pipeline | PASS by load order |
-| Browser automation in this execution environment | local Playwright/Chromium launch did not complete in this container | NOT CLAIMED — no fabricated screenshot evidence |
-| Wheel build | `python -m pip wheel . --no-deps --no-build-isolation` | PASS |
-| Wheel contains display-first assets | ZIP inspection of built wheel | PASS |
-| Isolated wheel import/assets | `pip install --target` + `LaboratorySession` import + static asset checks | PASS |
-
-Final v1.5 wheel SHA-256: `adc70cc8e468ee4b4b81d7190eb2dbc5fc15c7f795c46170eb8bf0967556b1cf`.
-
-The existing v1.4 browser transition evidence below remains evidence for the transition layer itself. v1.5 changes layout and control presentation; it does not alter simulation physics or transition semantics.
+| JavaScript syntax | `node --check` on every shipped JS asset | PASS |
+| Served stylesheet order | regression requires `core-surface.css` after `celestial-interaction.css` | PASS |
+| Opaque-canvas regression | tests reject any optional Planet rule that re-promotes `#planet-canvas` and require final `opacity:0 !important` | PASS |
+| Inline cascade guard | `core-surface.js` applies input-canvas opacity/background/z-index with inline `!important` and re-enforces after late initialization | PASS |
+| Single visual owner | Station 01 disables `.cc-globe-layer`, `.v17-globe-layer`, and `.v17-space-layer`; core surfaces remain | PASS |
+| Chromium pixel proof in this container | raw Chromium hangs in DBus/zygote before screenshot output | UNAVAILABLE — not claimed |
+| Same-path macOS visual confirmation | user browser | PENDING — do not call Planet rendering verified yet |
 
 ---
 
-## Historical v1.4 transition validation
-Validation date: 2026-08-26  
-Historical validated release: 1.4.0
+## v1.8.4 bounded Planet visibility repair
 
-## Product change under test
-
-v1.4 is a second visual/interaction pass over the real browser laboratory. The controlling requirement is no longer merely “make the command center prettier”; simulation state changes must become **visibly legible transitions**.
-
-The deterministic Python engine remains authoritative. The new `state-transitions.js` observes the state only after existing API mutations complete, compares the committed before/after snapshots, and creates presentation effects. It never changes simulation variables, chooses physics outcomes, or enters deterministic hashes.
-
-The same pass also strengthens the globe presentation with a lightweight state-aware FX layer: moving barcode-like Starsilk carriers, scan sweeps, target-cell bursts, and bond/inert-aware field intensity render above either globe implementation. The verified Canvas/WebGL globe underneath remains solver-backed by temperature/elevation/pressure/CO₂/stress data; the effect layer is presentation-only.
-
-## Visible transition coverage
-
-| Authoritative change | Required visible response | Verified result |
-|---|---|---|
-| Planet brush commit | target-cell effect unique to Heat/Cool/Uplift/Fracture/Pressure/CO₂ | PASS — browser Fracture path captured |
-| Macro instruction commit | execution pulse + transition readout; emitted grid commands create shared-planet effects | PASS |
-| Main stellar core reaches zero Starsilk | heliocide flash/impact + persistent event-horizon/lensing monitor state | PASS — browser heliocide path captured |
-| Syrin contact becomes positive | global nullification scan, persistent inert/desaturated state, readout changes to `ABSOLUTE NULLIFICATION` | PASS — browser nullification path captured |
-| Full reset after inert/collapsed state | restoration scan and removal of persistent state classes | PASS |
-| Starbinding vector committed | animated vector result; miss/hit/collapse are visually distinct | PASS |
-| Siege Wall solve | containment lock effect on stable solve | PASS |
-| Siege Wall capacity fracture | rupture transition + persistent fractured shell state | PASS |
-| Specimen hatch | hatch/field-instantiation transition | PASS |
-| Specimen pulse | phenotype-specific field burst on Incubator and shared Planet views | PASS — Fault-Tongue pulse captured |
-| Specimen field termination | explicit field-termination transition readout | IMPLEMENTED |
-
-## Validation ladder
+User evidence disproved v1.8.3: the macOS path still showed a blank Planet stage and briefly flashed the CSS glow during reload. Inspection isolated two coupled failures: `core-surface.js` read `globalThis.app` even though `app.js` declares `const app`, and the full-stage starfield canvas was above the CSS emergency sphere. v1.8.4 resolves the shared classic-script `app` binding directly, keeps the CSS fallback body permanently present, and places the starfield below it.
 
 | Check | Evidence | Result |
 |---|---|---|
-| Full Python unit + integration suite | `PYTHONPATH=src pytest -q` | PASS — 46 tests |
-| Python bytecode compilation | `PYTHONPATH=src python -m compileall -q src` | PASS |
-| JavaScript parse checks | `node --check` on `app.js`, `incubator.js`, `command-center.js`, `state-transitions.js` | PASS |
-| Placeholder/stub scan | source/test scan for `TODO`, `FIXME`, `NotImplementedError`, and bare `pass` | PASS |
-| Local HTTP health | `/api/health` on actual loopback server | PASS |
-| New transition assets delivered | root HTML injects `state-transitions.css` and `state-transitions.js`; both static routes serve | PASS |
-| State-aware globe enhancement | transition layer renders bond/inert-aware Starsilk carriers and solver-targeted field effects over either globe renderer | PASS |
-| Planet fracture transition | UI selects Fracture and clicks live planet; backend state mutates and transition readout becomes `PLANETARY COMMIT` | PASS |
-| Heliocide transition | UI withdraws 100% from active `LAB-STAR`; backend collapses core; body enters transient heliocide and persistent collapsed states | PASS |
-| Syrin transition | UI injects positive Syrin contact; backend becomes inert; body enters nullification and persistent inert states | PASS |
-| Reset recovery | UI reset clears inert/collapsed persistent states and reconstitutes baseline runtime | PASS |
-| Siege Wall fracture transition | browser sets minimum node capacity and solves; backend returns fractured matrix and UI enters persistent fracture state | PASS |
-| Macro transition | browser compiles and steps source; transition readout becomes `REALITY LOOP COMMIT` | PASS |
-| Starbinding transition | browser commits centered full-withdrawal vector; transition readout becomes `STARBINDING VECTOR` | PASS |
-| Incubator hatch transition | browser hatches Fault-Tongue; field-instantiation transition fires | PASS |
-| Incubator pulse transition | first Fault-Tongue pulse mutates shared planet; transition readout becomes `NOTEBOOK PULSE` | PASS |
-| Transition overlay canvases | four non-authoritative FX canvases installed over Planet, Incubator, Starbinding, Siege Wall stages | PASS |
-| Browser console/page errors | captured across complete transition journey | PASS — none |
-| Actual browser fracture screenshot | running application during state effect | PASS — `/mnt/data/drakken-v14-fracture-transition.png` |
-| Actual browser heliocide screenshot | running application during hard collapse transition | PASS — `/mnt/data/drakken-v14-heliocide-transition.png` |
-| Actual browser Syrin screenshot | running application during nullification cascade | PASS — `/mnt/data/drakken-v14-syrin-transition.png` |
-| Actual browser specimen screenshot | running application during Fault-Tongue Notebook pulse | PASS — `/mnt/data/drakken-v14-incubator-pulse.png` |
-| Wheel build | `python -m pip wheel . --no-deps --no-build-isolation` | PASS |
-| Wheel asset inspection | command-center, transition, Incubator, base UI, server/session assets present | PASS |
-| Installed-wheel smoke | isolated target imports `LaboratorySession` and resolves packaged transition assets | PASS |
-| Existing deterministic backend regression | Starsilk, stellar, terraforming, Starbinding, lattice, Syrin, telemetry behavior inside full suite | PASS |
+| Full deterministic Python suite | `PYTHONPATH=src pytest -q` | PASS — 54 tests |
+| Python compilation | `PYTHONPATH=src python -m compileall -q src` | PASS |
+| JavaScript syntax | `node --check` on every shipped JS asset | PASS |
+| Classic-script binding semantics | Node `vm`: later script resolves `app.view`; `globalThis.app` is `undefined` | PASS — reproduces root cause and repaired access model |
+| Fallback layering guard | regression asserts starfield z-index is below persistent CSS planet and no `core-render-live` hide rule remains | PASS |
+| Same-path macOS visual confirmation | user browser | PENDING — do not call Planet rendering verified yet |
 
-Final wheel SHA-256:
+---
 
-```text
-2ac80e3df03d36e0edb43aa0ac8da70edad737b53e3e649bbacb6d690d459bb4  drakken_terraforming_laboratory-1.4.0-py3-none-any.whl
-```
+# Validation — v1.8.3
 
-### Browser environment limitation
+The user supplied a macOS screenshot showing v1.8.2 with the application shell and authoritative state loaded while the entire Station 01 visualization remained blank. v1.8.3 treats that as a failed visual baseline and moves the guaranteed scene onto an independent render surface.
 
-The managed Chromium environment blocks direct page navigation to loopback/non-public hosts and exposes no WebGL2 context. Browser QA therefore preserves the evidence boundary explicitly:
-
-- the actual v1.4 loopback server runs independently on `127.0.0.1` and handles all state/API mutations;
-- the exact shipped HTML, CSS, and JavaScript assets are loaded into Chromium;
-- browser `fetch()` is bridged to that running loopback server by the QA harness because direct navigation is administratively blocked;
-- the verified Canvas command-center renderer performs the actual visual journey and screenshots;
-- the WebGL2 renderer is packaged and syntax-checked but cannot be runtime-exercised in this managed browser.
-
-The user's normal macOS Chromium browser is expected to expose WebGL2; automatic Canvas fallback remains the supported path if it does not.
-
-## Requirement traceability
-
-| ID | Mandatory requirement | Evidence | Status |
-|---|---|---|---|
-| R01 | Starsilk physics and deterministic backend invariants remain unchanged. | full regression suite | PASS |
-| R02 | The actual application receives the new work, not a concept image. | shipped source/assets + browser interaction journey | PASS |
-| R03 | Major hard state changes must be visibly distinct, not merely text/table updates. | heliocide, Syrin, Siege Wall, reset transition journeys | PASS |
-| R04 | Visual effects must follow authoritative state rather than decide it. | transition director wraps completed mutation pipeline only | PASS |
-| R05 | Planet interventions must visibly originate at their real target cell. | projection from mutation `row`/`col` + browser fracture capture | PASS |
-| R06 | Macro emissions must visibly connect the Macro station to shared planetary state. | emission-channel parsing + shared Planet/Incubator effect layers | PASS |
-| R07 | Starbinding hit/miss/collapse results must have separate visual treatment. | vector FX renderer + browser transition check | PASS |
-| R08 | Siege Wall fracture must remain visible after the transient rupture. | persistent `cc-state-fractured` state | PASS |
-| R09 | Syrin nullification must remain visibly inert until reset. | persistent `cc-state-inert`, disabled Starsilk controls, backend inert state | PASS |
-| R10 | Heliocide must remain visibly collapsed after the flash. | persistent event-horizon/lensing stellar monitor | PASS |
-| R11 | Drakken phenotypes must have differentiated field graphics. | phenotype-specific transition renderer | PASS |
-| R12 | The globe must look richer without substituting canned art for simulation data. | solver maps + shader/Canvas procedural presentation | PASS |
-| R13 | Starsilk visuals must respond to actual bond depletion and nullification. | transition-layer bond intensity + persistent inert gating | PASS |
-| R14 | Presentation animation must not contaminate deterministic hashes. | effects exist only in browser presentation layer | PASS |
-| R15 | Product remains local-first with no Node/Vite/Docker/cloud runtime dependency. | Python stdlib server + packaged static assets | PASS |
-| R16 | Product remains usable without WebGL2. | verified Canvas fallback | PASS |
-| R17 | Complete enhanced UI ships in the Python wheel. | wheel inspection + isolated installed-wheel smoke | PASS |
-
-**Verdict: PASS with one declared renderer limitation.** The v1.4 transition system is implemented and browser-verified through the supported Canvas path. Runtime verification of the optional WebGL2 path is blocked only by the managed Chromium environment; the application automatically falls back when WebGL2 is unavailable.
+- Full pytest suite: **53/53 passing**.
+- Python compilation: **pass**.
+- JavaScript syntax: **pass for every shipped `.js` file**.
+- `core-surface.js` is loaded immediately after the confirmed-working display-first layer and before optional celestial renderers.
+- `core-space-surface` and `core-planet-surface` are absolute stage-sized canvases independent of `#planet-canvas`.
+- `#planet-canvas` remains the interaction hit surface at near-zero opacity, so its stale bitmap cannot cover the guaranteed visual surface.
+- A CSS-only fallback sphere is visible until the JS surface successfully paints and adds `core-render-live`.
+- The guaranteed scene paints the deep parallax star field, state-bound distant primary, orbital bodies, and a complete sphere before solver-map sampling.
+- User macOS pixel verification remains required before promoting the repaired path to verified.
