@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="dark">
   <title>The Drakken Terraforming Laboratory</title>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/planet-safe.css">
 </head>
 <body>
   <div class="app-shell">
@@ -18,31 +19,21 @@
         </div>
       </div>
       <div class="topbar-status">
-        <div class="status-pill" id="runtime-status"><i></i><span>STARSILK ACTIVE</span></div>
+        <div class="status-pill" id="global-starsilk"><i></i><span>STARSILK ACTIVE</span></div>
         <div class="status-readout"><span>STATE</span><strong id="revision-readout">R0</strong></div>
-        <button class="ghost-button" id="export-state">Export state</button>
-        <button class="danger-outline" id="reset-lab">Reset laboratory</button>
+        <button class="ghost-button" id="export-state">EXPORT STATE</button>
+        <button class="danger-outline" id="reset-lab">RESET LABORATORY</button>
       </div>
     </header>
 
     <div class="body-shell">
       <nav class="nav-rail" aria-label="Laboratory stations">
-        <button class="nav-button active" data-view="planet" title="Planetary workbench">
-          <span class="nav-icon planet-icon"></span><span>Planet</span>
-        </button>
-        <button class="nav-button" data-view="macro" title="Starsilk macro editor">
-          <span class="nav-icon macro-icon">{ }</span><span>Macros</span>
-        </button>
-        <button class="nav-button" data-view="starbinding" title="Starbinding vector bench">
-          <span class="nav-icon dive-icon">↘</span><span>Starbinding</span>
-        </button>
-        <button class="nav-button" data-view="siege" title="Siege Wall lattice">
-          <span class="nav-icon lattice-icon">◉</span><span>Siege Wall</span>
-        </button>
-        <button class="nav-button" data-view="telemetry" title="Deterministic telemetry">
-          <span class="nav-icon telemetry-icon">≋</span><span>Telemetry</span>
-        </button>
+        <button class="nav-button active" data-view="planet"><span class="nav-icon planet-icon"></span><span>PLANET</span></button>
+        <button class="nav-button" data-view="macro"><span class="nav-icon macro-icon">{<br>}</span><span>MACRO</span></button>
+        <button class="nav-button" data-view="starbinding"><span class="nav-icon dive-icon">↘</span><span>STARBINDING</span></button>
+        <button class="nav-button" data-view="siege"><span class="nav-icon lattice-icon">◉</span><span>SIEGE WALL</span></button>
         <div class="nav-spacer"></div>
+        <button class="nav-button" data-view="telemetry"><span class="nav-icon telemetry-icon">≋</span><span>TELEMETRY</span></button>
         <div class="local-only">LOCAL<br>ONLY</div>
       </nav>
 
@@ -52,88 +43,65 @@
             <div>
               <div class="eyebrow">STATION 01</div>
               <h2>Planetary Transformation Workbench</h2>
-              <p>Apply Starsilk-driven interventions to the coupled atmospheric, lithospheric, and thermal solver.</p>
+              <p>Directly rewrite the deterministic thermal, lithospheric, and atmospheric grid. The same planet is shared by Macro execution and Drakken specimen fields.</p>
             </div>
             <div class="segmented" id="planet-mode">
-              <button class="active" data-mode="composite">Composite</button>
-              <button data-mode="thermal">Thermal</button>
-              <button data-mode="lithosphere">Lithosphere</button>
-              <button data-mode="atmosphere">Atmosphere</button>
-              <button data-mode="starsilk">Starsilk</button>
+              <button class="active" data-mode="composite">COMPOSITE</button>
+              <button data-mode="thermal">THERMAL</button>
+              <button data-mode="lithosphere">LITHOSPHERE</button>
+              <button data-mode="atmosphere">ATMOSPHERE</button>
+              <button data-mode="starsilk">STARSILK</button>
             </div>
           </div>
-
           <div class="planet-layout">
-            <div class="visual-card planet-stage-card">
-              <div class="card-chrome">
-                <div><span class="chrome-dot live"></span> LAB TEST BODY // SURFACE PROJECTION</div>
-                <div id="planet-hash">HASH —</div>
-              </div>
+            <section class="visual-card planet-stage-card">
+              <div class="card-chrome"><div><span class="chrome-dot live"></span> SHARED WORLD // LIVE SOLVER</div><div id="planet-hash">HASH —</div></div>
               <div class="canvas-wrap planet-canvas-wrap">
+                <img id="planet-static-scene" class="planet-static-scene" src="/static/planet-base.svg" alt="" aria-hidden="true">
+                <div id="planet-render-identity" class="planet-render-identity" data-build="1.8.6">SCENE 1.8.6 // SVG BASE</div>
                 <canvas id="planet-canvas" aria-label="Interactive planetary simulation"></canvas>
-                <div class="canvas-hud top-left">
-                  <span>DRAG</span> rotate &nbsp;·&nbsp; <span>CLICK</span> commit active tool
-                </div>
-                <div class="canvas-hud bottom-left" id="planet-cursor">CELL — / —</div>
-                <div class="canvas-hud bottom-right" id="planet-mode-label">COMPOSITE FIELD</div>
+                <div class="canvas-hud top-left">TARGET <span id="planet-cursor">CELL — / —</span></div>
+                <div class="canvas-hud bottom-left">DRAG ROTATE // CLICK APPLY</div>
+                <div class="canvas-hud bottom-right">STEP <span id="planet-step">0</span></div>
               </div>
-              <div class="tool-dock" id="planet-tools">
-                <button class="tool-button active" data-tool="heat"><b>Heat</b><small>thermal impulse</small></button>
-                <button class="tool-button" data-tool="cool"><b>Cool</b><small>thermal extraction</small></button>
-                <button class="tool-button" data-tool="uplift"><b>Uplift</b><small>lithic displacement</small></button>
-                <button class="tool-button" data-tool="fracture"><b>Fracture</b><small>stress injection</small></button>
-                <button class="tool-button" data-tool="pressure"><b>Pressure</b><small>atmospheric load</small></button>
-                <button class="tool-button" data-tool="co2"><b>CO₂</b><small>composition shift</small></button>
+              <div class="tool-dock">
+                <button class="tool-button active" data-tool="heat"><b>HEAT</b><small>thermal energy</small></button>
+                <button class="tool-button" data-tool="cool"><b>COOL</b><small>energy sink</small></button>
+                <button class="tool-button" data-tool="uplift"><b>UPLIFT</b><small>lithosphere</small></button>
+                <button class="tool-button" data-tool="fracture"><b>FRACTURE</b><small>stress field</small></button>
+                <button class="tool-button" data-tool="pressure"><b>PRESSURE</b><small>atmosphere</small></button>
+                <button class="tool-button" data-tool="co2"><b>CO₂</b><small>composition</small></button>
                 <div class="tool-sliders">
-                  <label>Intensity <strong id="intensity-value">45</strong><input id="tool-intensity" type="range" min="1" max="100" value="45"></label>
-                  <label>Radius <strong id="radius-value">3</strong><input id="tool-radius" type="range" min="1" max="8" value="3"></label>
+                  <label>RADIUS <strong id="brush-radius-value">3</strong><input id="brush-radius" type="range" min="1" max="8" value="3"></label>
+                  <label>INTENSITY <strong id="brush-intensity-value">50</strong><input id="brush-intensity" type="range" min="1" max="100" value="50"></label>
                 </div>
               </div>
-            </div>
-
+            </section>
             <aside class="instrument-stack">
               <section class="instrument-card stellar-card">
-                <div class="instrument-header"><span>STELLAR CORE MONITOR</span><span id="star-state-label">ACTIVE</span></div>
+                <div class="instrument-header"><span>STELLAR CORE MONITOR</span><span id="star-state">ACTIVE</span></div>
                 <div class="stellar-visual-row">
                   <div class="stellar-orb" id="stellar-orb"><div class="stellar-core"></div><div class="event-horizon"></div></div>
-                  <div class="bond-readout">
-                    <span>Starsilk bond index</span>
-                    <strong id="bond-index">1.000000</strong>
-                    <div class="meter"><i id="bond-meter"></i></div>
+                  <div class="stellar-readouts">
+                    <dl><dt>BOND INDEX</dt><dd id="bond-index">1.0000</dd><dt>CORE STATE</dt><dd id="core-state">STABLE</dd><dt>FLUX</dt><dd id="star-flux">—</dd></dl>
                   </div>
                 </div>
-                <div class="star-grid">
-                  <div><span>Core</span><strong>LAB-STAR</strong></div>
-                  <div><span>Mass</span><strong id="star-mass">1.000 M☉</strong></div>
-                  <div><span>Photosphere</span><strong id="star-temp">5772 K</strong></div>
-                  <div><span>Heliocide</span><strong id="heliocide-state">NO</strong></div>
-                </div>
-                <div class="control-block">
-                  <label>Withdraw Starsilk <strong id="withdraw-value">10%</strong></label>
-                  <input id="withdraw-slider" type="range" min="1" max="100" value="10">
-                  <button class="primary-button" id="withdraw-star">Commit withdrawal</button>
-                  <p class="microcopy">Zero remaining Starsilk is a hard state transition. There is no warning threshold.</p>
-                </div>
+                <div class="bond-meter"><i id="bond-meter-fill"></i></div>
+                <div class="withdraw-row"><input id="withdraw-fraction" type="range" min="1" max="100" value="10"><strong id="withdraw-value">10%</strong><button id="withdraw-star" class="danger-outline">WITHDRAW</button></div>
+                <p class="microcopy">Reaching exactly zero available Starsilk collapses the core immediately. There is no warning threshold.</p>
               </section>
-
-              <section class="instrument-card syrin-card">
-                <div class="instrument-header"><span>SYRIN NULLIFICATION</span><span>ABSOLUTE EXCEPTION</span></div>
-                <div class="syrin-copy">
-                  <div class="hazard-symbol">Ø</div>
-                  <div><strong>Contact kills the active Starsilk runtime.</strong><p>No resistance roll. No cooldown. No recovery without resetting the laboratory session.</p></div>
-                </div>
-                <button class="syrin-button" id="inject-syrin">Inject 1×10⁻¹² contact fraction</button>
-              </section>
-
               <section class="instrument-card stats-card">
-                <div class="instrument-header"><span>PLANETARY TELEMETRY</span><span id="planet-steps">STEP 0</span></div>
-                <div class="metric-grid">
-                  <div><span>Mean temp</span><strong id="metric-temp">—</strong></div>
-                  <div><span>Relief span</span><strong id="metric-relief">—</strong></div>
-                  <div><span>Mean pressure</span><strong id="metric-pressure">—</strong></div>
-                  <div><span>Mean CO₂</span><strong id="metric-co2">—</strong></div>
+                <div class="instrument-header"><span>PLANET FIELD SUMMARY</span><span>DETERMINISTIC</span></div>
+                <div class="stats-grid">
+                  <div><span>MEAN TEMP</span><strong id="stat-temp">—</strong></div><div><span>MEAN PRESSURE</span><strong id="stat-pressure">—</strong></div>
+                  <div><span>MAX ELEVATION</span><strong id="stat-elevation">—</strong></div><div><span>CO₂ FRACTION</span><strong id="stat-co2">—</strong></div>
                 </div>
-                <button class="ghost-button wide" id="advance-planet">Advance solver +1 s</button>
+                <button id="step-planet" class="ghost-button wide">ADVANCE PHYSICS +1.0 s</button>
+              </section>
+              <section class="instrument-card syrin-card">
+                <div class="instrument-header"><span>NULLIFICATION INTERRUPT</span><span>SYRIN</span></div>
+                <p>Any positive finite Syrin-blood contact interrupts the active Starsilk field before further Macro mutation.</p>
+                <button id="inject-syrin" class="syrin-button wide">INJECT POSITIVE SYRIN CONTACT</button>
               </section>
             </aside>
           </div>
@@ -141,181 +109,76 @@
 
         <section class="lab-view" id="view-macro" data-view-panel="macro">
           <div class="view-heading">
-            <div>
-              <div class="eyebrow">STATION 02</div>
-              <h2>Starsilk Macro Runtime</h2>
-              <p>Compile deterministic reality loops, step them instruction by instruction, and watch emissions alter the live laboratory state.</p>
-            </div>
-            <div class="runtime-chip" id="macro-runtime-chip">READY</div>
+            <div><div class="eyebrow">STATION 02</div><h2>Starsilk Macro Runtime</h2><p>Write deterministic reality loops, compile them into literal instructions, then execute stepwise against the same live planetary and stellar state.</p></div>
+            <div class="runtime-chip" id="macro-status-chip">UNCOMPILED</div>
           </div>
-
           <div class="macro-layout">
             <section class="visual-card editor-card">
-              <div class="card-chrome">
-                <div><span class="chrome-dot live"></span> MACRO SOURCE</div>
-                <div id="macro-source-hash">NOT COMPILED</div>
-              </div>
-              <div class="editor-shell">
-                <div class="editor-gutter" id="macro-gutter"></div>
-                <textarea id="macro-editor" spellcheck="false" aria-label="Starsilk macro source"># Ridge-and-heat laboratory macro
+              <div class="card-chrome"><div>MACRO SOURCE</div><div id="macro-cursor-readout">PC —</div></div>
+              <div class="editor-shell"><div class="line-gutter" id="macro-gutter"></div><textarea id="macro-editor" spellcheck="false"># Ridge-and-heat laboratory macro
 SET pulse 0
 REPEAT 6 {
   ADD pulse 1
   EMIT LITHO_ELEVATION 0 18 36 95
   EMIT THERMAL_ENERGY 0 18 36 2.5e13
 }
-ASSERT pulse == 6</textarea>
-              </div>
-              <div class="editor-controls">
-                <button class="primary-button" id="macro-compile">Compile / rewind cursor</button>
-                <button class="ghost-button" id="macro-step">Step</button>
-                <button class="ghost-button" id="macro-run">Run</button>
-                <button class="ghost-button" id="macro-pause">Pause</button>
-                <div class="macro-progress"><i id="macro-progress-bar"></i></div>
-                <span id="macro-progress-label">0 / 0</span>
-              </div>
+ASSERT pulse == 6</textarea></div>
+              <div class="editor-controls"><button class="ghost-button" id="macro-compile">COMPILE / REWIND</button><button class="primary-button" id="macro-step">STEP</button><button class="primary-button" id="macro-run">RUN</button><button class="ghost-button" id="macro-pause">PAUSE</button></div>
             </section>
-
             <aside class="macro-side">
-              <section class="instrument-card">
-                <div class="instrument-header"><span>EXECUTION REGISTER</span><span id="macro-next-line">LINE —</span></div>
-                <div class="register-list" id="register-list"><div class="empty-state">No register state yet.</div></div>
-              </section>
-              <section class="instrument-card">
-                <div class="instrument-header"><span>LAST INSTRUCTION</span><span>DETERMINISTIC</span></div>
-                <pre class="result-console" id="macro-result">Awaiting execution.</pre>
-              </section>
-              <section class="instrument-card syntax-card">
-                <div class="instrument-header"><span>SYNTAX</span><span>MACRO ISA</span></div>
-                <code>SET x 0</code><code>ADD x 1</code><code>MUL x 2</code><code>DIV x 4</code>
-                <code>REPEAT 4 { ... }</code><code>ASSERT x == 4</code>
-                <code>EMIT THERMAL_ENERGY 0 row col joules</code>
-                <code>WITHDRAW LAB-STAR 1</code>
-              </section>
-              <section class="instrument-card preset-card">
-                <div class="instrument-header"><span>LOAD PRESET</span><span>LAB ONLY</span></div>
-                <div class="preset-buttons">
-                  <button data-preset="ridge">Ridge pulse</button>
-                  <button data-preset="atmosphere">Atmospheric load</button>
-                  <button data-preset="heliocide">Heliocide threshold</button>
-                </div>
-              </section>
+              <section class="instrument-card"><div class="instrument-header"><span>EXECUTION</span><span id="macro-progress">0 / 0</span></div><div class="macro-track"><i id="macro-track-fill"></i></div><div class="instruction-card" id="macro-instruction"><span>NEXT INSTRUCTION</span><strong>—</strong></div></section>
+              <section class="instrument-card register-card"><div class="instrument-header"><span>STATE REGISTERS</span><span>DECIMAL</span></div><div id="register-list" class="register-list"><div class="empty-state">Compile a Macro.</div></div></section>
+              <section class="instrument-card"><div class="instrument-header"><span>PRESETS</span><span>LOAD SOURCE</span></div><div class="preset-grid"><button data-preset="terrain">RIDGE + HEAT</button><button data-preset="atmosphere">ATMOSPHERE</button><button data-preset="heliocide">HELICOIDE</button></div></section>
+              <section class="instrument-card"><div class="instrument-header"><span>LAST EMISSION</span><span>SHARED WORLD</span></div><div id="macro-last-emission" class="last-emission">No grid emissions committed.</div></section>
             </aside>
           </div>
         </section>
 
         <section class="lab-view" id="view-starbinding" data-view-panel="starbinding">
-          <div class="view-heading">
-            <div>
-              <div class="eyebrow">STATION 03</div>
-              <h2>Starbinding Vector Bench</h2>
-              <p>Aim a star-dive ray against the modeled stellar core. Geometry decides whether the vector intersects; Starsilk withdrawal decides whether the core survives.</p>
-            </div>
-            <button class="danger-outline" id="canonical-wave">Execute canonical 16-vector wave</button>
-          </div>
+          <div class="view-heading"><div><div class="eyebrow">STATION 03</div><h2>Starbinding Vector Bench</h2><p>A dive only withdraws Starsilk if its trajectory intersects the stellar core. Aim badly and it misses. Pull the final bond on a hit and the system becomes a black hole immediately.</p></div><div class="runtime-chip" id="dive-chip">READY</div></div>
           <div class="starbinding-layout">
             <section class="visual-card starbinding-card">
-              <div class="card-chrome"><div><span class="chrome-dot live"></span> DIVE GEOMETRY</div><div>RAY / CORE INTERSECTION</div></div>
-              <div class="canvas-wrap starbinding-canvas-wrap"><canvas id="starbinding-canvas"></canvas></div>
+              <div class="card-chrome"><div><span class="chrome-dot live"></span> VECTOR SOLVER</div><div>CORE INTERSECTION</div></div>
+              <div class="canvas-wrap starbinding-canvas-wrap"><canvas id="starbinding-canvas"></canvas><div class="canvas-hud bottom-left">GEOMETRY IS DETERMINISTIC</div></div>
               <div class="vector-controls">
-                <label>Offset <strong id="offset-value">0.00 R</strong><input id="dive-offset" type="range" min="-600" max="600" value="0"></label>
-                <label>Approach angle <strong id="angle-value">0.0°</strong><input id="dive-angle" type="range" min="-150" max="150" value="0"></label>
-                <label>Velocity <strong id="velocity-value">0.20 c</strong><input id="dive-velocity" type="range" min="1" max="95" value="20"></label>
-                <label>Withdrawal <strong id="dive-withdrawal-value">100%</strong><input id="dive-withdrawal" type="range" min="1" max="100" value="100"></label>
-                <button class="primary-button" id="commit-dive">Commit dive</button>
+                <label>OFFSET <strong id="dive-offset-value">0.00 R★</strong><input id="dive-offset" type="range" min="-180" max="180" value="0"></label>
+                <label>ANGLE <strong id="dive-angle-value">0°</strong><input id="dive-angle" type="range" min="-90" max="90" value="0"></label>
+                <label>VELOCITY <strong id="dive-velocity-value">0.20 c</strong><input id="dive-velocity" type="range" min="1" max="95" value="20"></label>
+                <label>WITHDRAWAL <strong id="dive-withdraw-value">100%</strong><input id="dive-withdraw" type="range" min="1" max="100" value="100"></label>
+                <button class="primary-button" id="commit-dive">COMMIT DIVE</button><button class="ghost-button" id="run-wave">RUN STARBINDING WAVE</button>
               </div>
             </section>
             <aside class="instrument-stack">
-              <section class="instrument-card">
-                <div class="instrument-header"><span>VECTOR RESULT</span><span id="dive-result-state">UNFIRED</span></div>
-                <div class="big-result" id="dive-big-result">NO VECTOR COMMITTED</div>
-                <p class="microcopy" id="dive-result-copy">The core is not decorative. Miss it and nothing is withdrawn. Hit it and the configured withdrawal is applied.</p>
-              </section>
-              <section class="instrument-card history-card">
-                <div class="instrument-header"><span>DIVE HISTORY</span><span id="dive-count">0 RUNS</span></div>
-                <div class="history-list" id="dive-history"><div class="empty-state">No vectors committed.</div></div>
-              </section>
-              <section class="instrument-card">
-                <div class="instrument-header"><span>CANONICAL WAVE</span><span>STARBINDING</span></div>
-                <div class="wave-result" id="wave-result"><strong>—</strong><span>represented collapses</span></div>
-                <p class="microcopy">The preset uses full withdrawal on every successful core-intercepting dive and preserves the established deterministic Starbinding scale.</p>
-              </section>
+              <section class="instrument-card"><div class="instrument-header"><span>VECTOR RESULT</span><span id="dive-result-state">UNFIRED</span></div><div class="big-result" id="dive-big-result">NO VECTOR COMMITTED</div><p class="microcopy" id="dive-result-copy">The core is not decorative. Miss it and nothing is withdrawn. Hit it and the configured withdrawal is applied.</p></section>
+              <section class="instrument-card history-card"><div class="instrument-header"><span>DIVE HISTORY</span><span id="dive-count">0 RUNS</span></div><div class="history-list" id="dive-history"><div class="empty-state">No vectors committed.</div></div></section>
+              <section class="instrument-card"><div class="instrument-header"><span>CANONICAL WAVE</span><span>STARBINDING</span></div><div class="wave-result" id="wave-result"><strong>—</strong><span>represented collapses</span></div><p class="microcopy">The preset uses full withdrawal on every successful core-intercepting dive and preserves the established deterministic Starbinding scale.</p></section>
             </aside>
           </div>
         </section>
 
         <section class="lab-view" id="view-siege" data-view-panel="siege">
-          <div class="view-heading">
-            <div>
-              <div class="eyebrow">STATION 04</div>
-              <h2>Siege Wall Heliocide Lattice</h2>
-              <p>Generate singularities from heliocide events, place orbital anchor nodes, solve the gravimetric coupling matrix, and watch capacity failures fracture the wall.</p>
-            </div>
-            <div class="runtime-chip" id="siege-status-chip">UNSOLVED</div>
-          </div>
+          <div class="view-heading"><div><div class="eyebrow">STATION 04</div><h2>Siege Wall Heliocide Lattice</h2><p>Generate singularities from heliocide events, place orbital anchor nodes, solve the gravimetric coupling matrix, and watch capacity failures fracture the wall.</p></div><div class="runtime-chip" id="siege-status-chip">UNSOLVED</div></div>
           <div class="siege-layout">
             <section class="visual-card siege-card">
               <div class="card-chrome"><div><span class="chrome-dot live"></span> AUREAL CONTAINMENT GEOMETRY</div><div>EVENT HORIZONS / ANCHOR LOADS</div></div>
               <div class="canvas-wrap siege-canvas-wrap"><canvas id="siege-canvas"></canvas></div>
-              <div class="siege-controls">
-                <label>Singularities <strong id="singularity-value">8</strong><input id="siege-singularities" type="range" min="1" max="32" value="8"></label>
-                <label>Orbital nodes <strong id="node-value">12</strong><input id="siege-nodes" type="range" min="3" max="48" value="12"></label>
-                <label>Node capacity <strong id="capacity-value">0.050 m/s²</strong><input id="siege-capacity" type="range" min="1" max="200" value="50"></label>
-                <button class="primary-button" id="solve-siege">Stabilize lattice</button>
-              </div>
+              <div class="siege-controls"><label>SINGULARITIES <strong id="siege-sing-value">8</strong><input id="siege-sing" type="range" min="2" max="20" value="8"></label><label>ANCHOR NODES <strong id="siege-node-value">12</strong><input id="siege-nodes" type="range" min="4" max="32" value="12"></label><label>NODE CAPACITY <strong id="siege-capacity-value">0.050 m/s²</strong><input id="siege-capacity" type="range" min="1" max="100" value="50"></label><button class="primary-button" id="solve-siege">SOLVE LATTICE</button></div>
             </section>
-            <aside class="instrument-stack">
-              <section class="instrument-card">
-                <div class="instrument-header"><span>LATTICE LOAD</span><span id="siege-fracture-label">—</span></div>
-                <div class="utilization-gauge"><i id="siege-utilization"></i><span id="siege-utilization-label">0%</span></div>
-                <p class="microcopy" id="siege-reason">Configure and solve the containment matrix.</p>
-              </section>
-              <section class="instrument-card">
-                <div class="instrument-header"><span>BOUNDARY CONDITIONS</span><span>HARD FAILURE</span></div>
-                <ul class="constraint-list">
-                  <li>Every singularity originates from an actual heliocide event.</li>
-                  <li>An orbital node inside an event horizon fractures containment.</li>
-                  <li>Node utilization above 1.0 fractures the lattice.</li>
-                  <li>No hidden stabilization threshold or random rescue path exists.</li>
-                </ul>
-              </section>
-            </aside>
+            <aside class="instrument-stack"><section class="instrument-card"><div class="instrument-header"><span>LATTICE RESULT</span><span id="siege-result-label">UNSOLVED</span></div><div id="siege-result" class="big-result">NO MATRIX</div><p id="siege-copy" class="microcopy">Configure the lattice and solve deterministic anchor loads.</p></section><section class="instrument-card"><div class="instrument-header"><span>ANCHOR LOADS</span><span>UTILIZATION</span></div><div id="anchor-loads" class="anchor-loads"><div class="empty-state">No solved nodes.</div></div></section></aside>
           </div>
         </section>
 
         <section class="lab-view" id="view-telemetry" data-view-panel="telemetry">
-          <div class="view-heading">
-            <div>
-              <div class="eyebrow">STATION 05</div>
-              <h2>Deterministic Telemetry Ledger</h2>
-              <p>Mutation sequence only. No wall-clock contamination enters the deterministic state record.</p>
-            </div>
-            <div class="segmented" id="telemetry-filter">
-              <button class="active" data-filter="all">All</button>
-              <button data-filter="planet">Planet</button>
-              <button data-filter="macro">Macros</button>
-              <button data-filter="stellar">Stellar</button>
-              <button data-filter="starbinding">Starbinding</button>
-              <button data-filter="siege_wall">Siege</button>
-              <button data-filter="syrin">Syrin</button>
-            </div>
-          </div>
-          <section class="visual-card telemetry-card">
-            <div class="card-chrome"><div><span class="chrome-dot live"></span> SESSION EVENT STREAM</div><div id="telemetry-count">0 EVENTS</div></div>
-            <div class="telemetry-table" id="telemetry-list"><div class="empty-state large">No state mutations yet.</div></div>
-          </section>
+          <div class="view-heading"><div><div class="eyebrow">STATION 05</div><h2>Deterministic Telemetry</h2><p>Every committed state mutation is sequenced and chained. Presentation animation is excluded from these records.</p></div><div class="segmented" id="telemetry-filter"><button class="active" data-filter="all">ALL</button><button data-filter="planet">PLANET</button><button data-filter="macro">MACRO</button><button data-filter="stellar">STELLAR</button><button data-filter="siege">LATTICE</button><button data-filter="syrin">SYRIN</button></div></div>
+          <section class="visual-card telemetry-card"><div class="card-chrome"><div>EVENT STREAM</div><div id="telemetry-count">0 EVENTS</div></div><div class="telemetry-table" id="telemetry-list"></div></section>
         </section>
       </main>
     </div>
 
-    <footer class="statusbar">
-      <div><span class="status-light"></span> LOCAL COMPUTE</div>
-      <div id="footer-state">Waiting for laboratory state…</div>
-      <div>NO CLOUD · NO RANDOMNESS · NO ALLEGORY</div>
-    </footer>
+    <footer class="statusbar"><div><span class="status-light"></span> LOCAL COMPUTE</div><div id="status-message">laboratory ready</div><div>NO CLOUD · NO RANDOMNESS · NO ALLEGORY</div></footer>
   </div>
-
-  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="/static/app.js"></script>
+  <script src="/static/planet-safe.js"></script>
 </body>
 </html>
