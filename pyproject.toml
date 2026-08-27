@@ -34,4 +34,4 @@ testpaths = ["tests"]
 addopts = "-q"
 
 [tool.setuptools.package-data]
-labui = ["static/*.html", "static/*.css", "static/*.js"]
+labui = ["static/*.html", "static/*.css", "static/*.js", "static/*.svg"]
