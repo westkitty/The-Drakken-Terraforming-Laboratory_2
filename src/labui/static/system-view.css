@@ -1,12 +1,12 @@
-/* v1.8.1 fail-safe celestial display */
+/* v1.8.5 optional celestial enhancement */
 .command-center .canvas-wrap{background:#000205!important}
 .v17-space-layer,.v17-globe-layer{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .v17-space-layer{z-index:0}
 .v17-globe-layer{z-index:6;transform-origin:50% 49%;filter:drop-shadow(0 0 26px rgba(53,232,255,.08));transition:transform .22s cubic-bezier(.2,.8,.2,1)}
-/* HARD INVARIANT: never hide the known-working globe beneath an enhancement layer.
-   The enhanced Canvas2D globe is transparent outside its painted sphere, so the
-   base renderer can remain permanently available underneath it at no state cost. */
-.v17-celestial-ready>#planet-canvas,.v17-celestial-ready>#incubator-canvas{opacity:1!important;visibility:visible!important}
+/* Station 01 now owns its guaranteed render surface in core-surface.css.
+   The legacy Planet canvas is input-only and must never be promoted back to an
+   opaque presentation layer. Incubator retains its independent fallback path. */
+.v17-celestial-ready>#incubator-canvas{opacity:1!important;visibility:visible!important}
 .v17-celestial-ready>.cc-globe-layer{opacity:1!important;visibility:visible!important}
 .interaction-v16 #view-planet .v17-globe-layer,.interaction-v16 #view-incubator .v17-globe-layer{transform:scale(var(--ir-zoom,1))}
 .display-first .cc-globe-hud{z-index:10!important}.display-first .cc-state-fx{z-index:11!important}.display-first .cc-stage-label,.display-first .cc-floating-panel{z-index:13!important}
