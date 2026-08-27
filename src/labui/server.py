@@ -176,7 +176,7 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             text = candidate.read_text(encoding="utf-8")
             text = text.replace(
                 '<link rel="stylesheet" href="/static/styles.css">',
-                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/core-surface.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">',
+                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">\n  <link rel="stylesheet" href="/static/core-surface.css">',
             )
             text = text.replace(
                 '<script src="/static/app.js"></script>',
