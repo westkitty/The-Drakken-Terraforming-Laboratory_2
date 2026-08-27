@@ -1,11 +1,11 @@
 "use strict";
 
-/* v1.8.6 Station 01 visibility watchdog.
-   This script is linked directly after app.js; server.py expands app.js in place,
-   therefore this executes after every optional presentation script. It does not
-   mutate simulation state. */
+/* v1.8.6-HF1 Station 01 paint-starvation hotfix.
+   This file loads after every optional presentation script. It performs only
+   finite enforcement passes: no DOM observer can feed style
+   mutations back into itself and starve the browser's paint/image-load work. */
 (() => {
-  const BUILD = "1.8.6";
+  const BUILD = "1.8.6-HF1";
   const view = document.querySelector("#view-planet");
   const wrap = view?.querySelector(".planet-canvas-wrap");
   const base = view?.querySelector("#planet-canvas");
@@ -24,6 +24,12 @@
 
   function important(node, property, value) {
     node?.style?.setProperty(property, value, "important");
+  }
+
+  function setBadge(state) {
+    if (!badge) return;
+    const rect = wrap.getBoundingClientRect();
+    badge.textContent = `SCENE ${BUILD} // ${state} // ${Math.round(rect.width)}×${Math.round(rect.height)}`;
   }
 
   function enforce() {
@@ -62,27 +68,27 @@
       });
     }
 
-    wrap.dataset.sceneOwner = "svg-core-v186";
+    wrap.dataset.sceneOwner = "svg-core-v186-hf1";
     document.documentElement.dataset.drakkenBuild = BUILD;
-    if (badge) {
-      const rect = wrap.getBoundingClientRect();
-      const dynamic = Boolean(dynamicPlanet);
-      badge.textContent = `SCENE ${BUILD} // SVG ON // ${Math.round(rect.width)}×${Math.round(rect.height)} // CORE ${dynamic ? "ON" : "WAIT"}`;
-    }
+    setBadge(svg.complete && svg.naturalWidth > 0 ? "SVG LOADED" : "SVG WAITING");
   }
 
+  svg.addEventListener("load", () => { enforce(); setBadge("SVG LOADED"); }, { once: true });
+  svg.addEventListener("error", () => setBadge("SVG LOAD ERROR"), { once: true });
+
+  // All optional presentation scripts execute before this file. A few bounded
+  // passes cover layout settling without any observer feedback loop.
   enforce();
-  const observer = new MutationObserver(() => enforce());
-  observer.observe(wrap, { childList: true, attributes: true, subtree: false, attributeFilter: ["class", "style"] });
-  if (typeof ResizeObserver === "function") new ResizeObserver(enforce).observe(wrap);
-  for (const delay of [0, 50, 180, 600, 1500, 3500]) setTimeout(enforce, delay);
+  for (const delay of [0, 60, 240, 900, 2200]) setTimeout(enforce, delay);
+  window.addEventListener("resize", enforce, { passive: true });
 
   window.__drakkenSceneDiagnostics = () => {
     const nodes = [svg, wrap.querySelector(".core-planet-surface"), base].filter(Boolean);
     return {
       build: BUILD,
       owner: wrap.dataset.sceneOwner,
-      wrap: wrap.getBoundingClientRect().toJSON?.() || { width: wrap.clientWidth, height: wrap.clientHeight },
+      svg: { complete: svg.complete, naturalWidth: svg.naturalWidth, naturalHeight: svg.naturalHeight, src: svg.currentSrc || svg.src },
+      wrap: { width: wrap.clientWidth, height: wrap.clientHeight },
       layers: nodes.map((node) => {
         const cs = getComputedStyle(node);
         const r = node.getBoundingClientRect();
