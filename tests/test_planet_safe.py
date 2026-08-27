@@ -64,7 +64,10 @@ def test_planet_safe_contract_has_non_canvas_visible_body_and_transparent_hit_su
     assert 'opacity:0!important' in css
     assert '.v17-globe-layer' in css
     assert '.v18-lighting-overlay' in css
-    assert 'MutationObserver' in js
+    assert 'MutationObserver' not in js
+    assert 'ResizeObserver' not in js
+    assert 'SVG LOADED' in js
+    assert 'SVG LOAD ERROR' in js
     assert 'sceneOwner' in js
     assert '__drakkenSceneDiagnostics' in js
     # Visibility protection is DOM/CSS based and must not depend on simulation state.
@@ -80,7 +83,7 @@ def test_planet_safe_static_routes_are_served() -> None:
     try:
         for path, media, token in [
             ("/static/planet-safe.css", "text/css", b"hard visibility contract"),
-            ("/static/planet-safe.js", "text/javascript", b"visibility watchdog"),
+            ("/static/planet-safe.js", "text/javascript", b"paint-starvation hotfix"),
             ("/static/planet-base.svg", "image/svg+xml", b"ps-distant-system"),
         ]:
             status, content_type, payload = _get(port, path)
