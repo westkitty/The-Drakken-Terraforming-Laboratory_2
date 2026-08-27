@@ -11,13 +11,12 @@ def _get(port: int, path: str) -> tuple[int, str, bytes]:
     conn.request("GET", path)
     response = conn.getresponse()
     payload = response.read()
-    content_type = response.getheader("Content-Type") or ""
-    status = response.status
+    result = (response.status, response.getheader("Content-Type") or "", payload)
     conn.close()
-    return status, content_type, payload
+    return result
 
 
-def test_celestial_display_assets_are_loaded_by_product_shell() -> None:
+def test_legacy_system_view_is_retired_from_product_shell() -> None:
     server = make_server("127.0.0.1", 0)
     port = server.server_address[1]
     thread = Thread(target=server.serve_forever, daemon=True)
@@ -26,15 +25,15 @@ def test_celestial_display_assets_are_loaded_by_product_shell() -> None:
         status, content_type, html = _get(port, "/")
         assert status == 200
         assert "text/html" in content_type
-        assert b'/static/system-view.css' in html
-        assert b'/static/system-view.js' in html
+        assert b'/static/system-view.css' not in html
+        assert b'/static/system-view.js' not in html
+        assert b'/static/command-center.js' in html
+        assert b'/static/planet-base.svg' in html
     finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
+        server.shutdown(); server.server_close(); thread.join(timeout=2)
 
 
-def test_celestial_renderer_keeps_globe_and_orbital_context_independent_of_webgl() -> None:
+def test_retired_system_view_assets_remain_inspectable_but_are_not_runtime_owners() -> None:
     server = make_server("127.0.0.1", 0)
     port = server.server_address[1]
     thread = Thread(target=server.serve_forever, daemon=True)
@@ -43,18 +42,10 @@ def test_celestial_renderer_keeps_globe_and_orbital_context_independent_of_webgl
         status, content_type, js = _get(port, "/static/system-view.js")
         assert status == 200
         assert "text/javascript" in content_type
-        assert b"Canvas2D" in js
         assert b"class CelestialStage" in js
-        assert b"drawDistantSystem" in js
-        assert b"makeStars" in js
-
         status, content_type, css = _get(port, "/static/system-view.css")
         assert status == 200
         assert "text/css" in content_type
-        assert b"v17-space-layer" in css
         assert b"v17-globe-layer" in css
-        assert b"v17-celestial-ready" in css
     finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
+        server.shutdown(); server.server_close(); thread.join(timeout=2)

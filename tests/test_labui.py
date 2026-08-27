@@ -109,6 +109,12 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert b"/static/command-center.js" in html
         assert b"/static/display-first.css" in html
         assert b"/static/display-first.js" in html
+        assert b"/static/system-view.css" not in html
+        assert b"/static/system-view.js" not in html
+        assert b"/static/core-surface.js" not in html
+        assert b"/static/celestial-interaction.js" not in html
+        assert b"/static/planet-safe.css" in html
+        assert b"/static/planet-safe.js" in html
         assert b"/static/state-transitions.css" in html
         assert b"/static/state-transitions.js" in html
 
@@ -135,6 +141,19 @@ def test_local_server_serves_product_ui_and_state_api() -> None:
         assert "text/css" in content_type
         assert b"df-drawer-left" in display_first_css
         assert b"grid-template-columns:var(--df-rail)" in display_first_css
+
+        status, content_type, system_view = _request(port, "GET", "/static/system-view.js")
+        assert status == 200
+        assert "text/javascript" in content_type
+        assert b"dependable celestial display" in system_view
+        assert b"class CelestialStage" in system_view
+        assert b"drawDistantSystem" in system_view
+
+        status, content_type, system_view_css = _request(port, "GET", "/static/system-view.css")
+        assert status == 200
+        assert "text/css" in content_type
+        assert b"v17-space-layer" in system_view_css
+        assert b"v17-globe-layer" in system_view_css
 
         status, content_type, transition_js = _request(port, "GET", "/static/state-transitions.js")
         assert status == 200

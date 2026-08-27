@@ -16,7 +16,7 @@ from .session import LaboratorySession
 
 STATIC_ROOT = Path(__file__).with_name("static")
 MAX_REQUEST_BYTES = 1_000_000
-LAB_UI_BUILD = "1.8.6-svg-base"
+LAB_UI_BUILD = "1.9.0-concept-single-globe"
 
 
 class LaboratoryHTTPServer(ThreadingHTTPServer):
@@ -38,7 +38,7 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802 - stdlib hook name
         path = urlparse(self.path).path
         if path == "/api/health":
-            self._json({"ok": True, "product": "The Drakken Terraforming Laboratory", "version": "1.8.6", "ui_build": LAB_UI_BUILD})
+            self._json({"ok": True, "product": "The Drakken Terraforming Laboratory", "version": "1.9.0", "ui_build": LAB_UI_BUILD})
             return
         if path == "/api/state":
             self._json(self.server.session.snapshot())
@@ -177,15 +177,15 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             text = candidate.read_text(encoding="utf-8")
             text = text.replace(
                 '<link rel="stylesheet" href="/static/styles.css">',
-                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">\n  <link rel="stylesheet" href="/static/core-surface.css">',
+                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">',
             )
             text = text.replace(
                 '<script src="/static/app.js"></script>',
-                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>\n  <script src="/static/display-first.js"></script>\n  <script src="/static/core-surface.js"></script>\n  <script src="/static/system-view.js"></script>\n  <script src="/static/celestial-interaction.js"></script>',
+                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>\n  <script src="/static/display-first.js"></script>',
             )
             text = text.replace(
                 '<div class="eyebrow">DRAKKEN SYSTEMS // LOCAL COMPUTATIONAL FACILITY</div>',
-                '<div class="eyebrow">DRAKKEN SYSTEMS // LOCAL COMPUTATIONAL FACILITY // v1.8.6</div>',
+                '<div class="eyebrow">DRAKKEN SYSTEMS // LOCAL COMPUTATIONAL FACILITY // v1.9.0</div>',
             )
             payload = text.encode("utf-8")
         else:

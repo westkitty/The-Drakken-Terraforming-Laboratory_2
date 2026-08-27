@@ -1,40 +1,61 @@
-/* v1.8.6 Station 01 hard visibility contract.
-   This file is linked directly by index.html after the server-injected presentation
-   styles, so it is the final stylesheet in the cascade. */
+/* v1.9 Station 01: one visual globe owner.
+   Background SVG owns only the chamber/star system. command-center.js owns the
+   sole planet. The legacy canvas remains a transparent interaction surface. */
 #view-planet .planet-canvas-wrap{
   position:relative!important;
   isolation:isolate!important;
   overflow:hidden!important;
-  background:#000205!important;
+  background:#000204!important;
 }
 #view-planet #planet-static-scene{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  object-fit:cover!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  transform:scale(1.025) translate(0,0);
+  transform-origin:50% 50%;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1);
+  will-change:transform;
+}
+/* The command-center sphere is the ONLY visible planet renderer. */
+#view-planet .planet-canvas-wrap>.cc-globe-layer{
   position:absolute!important;
   inset:0!important;
   display:block!important;
   visibility:visible!important;
   opacity:1!important;
-  width:100%!important;
-  height:100%!important;
-  z-index:2!important;
+  z-index:6!important;
   pointer-events:none!important;
+  background:transparent!important;
 }
-#view-planet #planet-render-identity{
+#view-planet .planet-canvas-wrap>.cc-globe-hud{
   position:absolute!important;
-  right:16px!important;
-  bottom:14px!important;
-  z-index:31!important;
+  inset:0!important;
   display:block!important;
   visibility:visible!important;
-  opacity:.78!important;
-  padding:5px 8px!important;
-  border:1px solid rgba(53,232,255,.22)!important;
-  background:rgba(1,9,14,.72)!important;
-  color:#65dff3!important;
-  font:700 7px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace!important;
-  letter-spacing:.14em!important;
+  opacity:1!important;
+  z-index:7!important;
   pointer-events:none!important;
+  background:transparent!important;
 }
-/* The historical canvas is input only. It must never be a visual layer. */
+/* Old render experiments are never allowed to contribute a second sphere. */
+#view-planet .planet-canvas-wrap>.core-space-surface,
+#view-planet .planet-canvas-wrap>.core-planet-surface,
+#view-planet .planet-canvas-wrap>.v17-space-layer,
+#view-planet .planet-canvas-wrap>.v17-globe-layer,
+#view-planet .planet-canvas-wrap>.v18-lighting-overlay,
+#view-planet .planet-canvas-wrap>.v18-orbital-overlay{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+/* Existing pointer/keyboard interaction remains attached to the historical canvas. */
 #view-planet .planet-canvas-wrap>#planet-canvas{
   position:absolute!important;
   inset:0!important;
@@ -47,40 +68,66 @@
   z-index:30!important;
   pointer-events:auto!important;
 }
-/* The v1.8.6 dynamic solver canvas may enhance the permanent SVG body. */
-#view-planet .planet-canvas-wrap>.core-planet-surface{
+#view-planet .planet-canvas-wrap>.cc-holo-platform{z-index:4!important}
+#view-planet .planet-canvas-wrap>.cc-beam{z-index:3!important}
+#view-planet .planet-canvas-wrap>.cc-orbit{z-index:5!important}
+#view-planet .planet-canvas-wrap>.cc-state-fx{z-index:11!important;background:transparent!important}
+#view-planet .planet-canvas-wrap>.cc-floating-panel{z-index:18!important}
+#view-planet .planet-canvas-wrap>.cc-stage-label{z-index:19!important}
+#view-planet .planet-canvas-wrap>.canvas-hud{z-index:32!important}
+
+#view-planet #planet-render-identity{
   position:absolute!important;
-  inset:0!important;
+  right:18px!important;
+  bottom:16px!important;
+  z-index:33!important;
   display:block!important;
-  visibility:visible!important;
-  opacity:1!important;
-  background:transparent!important;
-  z-index:4!important;
+  opacity:.46!important;
+  padding:4px 7px!important;
+  border:1px solid rgba(53,232,255,.12)!important;
+  background:rgba(1,7,11,.54)!important;
+  color:#4ea2b5!important;
+  font:700 6px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace!important;
+  letter-spacing:.13em!important;
   pointer-events:none!important;
 }
-/* Static SVG owns deep space. Disable duplicate historical Planet render surfaces. */
-#view-planet .planet-canvas-wrap>.core-space-surface,
-#view-planet .planet-canvas-wrap>.cc-globe-layer,
-#view-planet .planet-canvas-wrap>.v17-space-layer,
-#view-planet .planet-canvas-wrap>.v17-globe-layer,
-#view-planet .planet-canvas-wrap>.v18-lighting-overlay,
-#view-planet .planet-canvas-wrap>.v18-orbital-overlay{
-  display:none!important;
-  visibility:hidden!important;
-  opacity:0!important;
-}
-/* Keep state/HUD overlays above the actual scene without giving them a background. */
-#view-planet .planet-canvas-wrap>.cc-globe-hud{z-index:10!important;background:transparent!important}
-#view-planet .planet-canvas-wrap>.cc-state-fx{z-index:11!important;background:transparent!important}
-#view-planet .planet-canvas-wrap>.canvas-hud{z-index:32!important}
-#view-planet .planet-canvas-wrap>.cc-stage-label,
-#view-planet .planet-canvas-wrap>.cc-floating-panel{z-index:20!important}
-/* The old pseudo-element fallback is superseded by real SVG markup. */
-#view-planet .planet-canvas-wrap::before{display:none!important}
 
-@media (max-width:720px){
-  #view-planet #planet-render-identity{right:8px!important;bottom:70px!important}
+/* Concept-art composition: one centered specimen, restrained persistent HUD. */
+.display-first #view-planet .cc-holo-platform{
+  bottom:3.3%!important;
+  width:min(58%,760px)!important;
+  height:12%!important;
+  border-color:rgba(72,225,255,.27)!important;
+  box-shadow:0 0 34px rgba(43,211,255,.12),inset 0 0 42px rgba(43,211,255,.055)!important;
 }
-@media (prefers-reduced-motion:reduce){
-  #view-planet #planet-static-scene *{animation:none!important}
+.display-first #view-planet .cc-beam{bottom:5%!important;height:48%!important;width:31%!important;opacity:.16!important}
+.display-first #view-planet .cc-orbit{width:min(66%,910px)!important;height:30%!important;top:51%!important;opacity:.34!important}
+.display-first #view-planet .cc-stage-label{
+  bottom:2.1%!important;
+  min-width:300px!important;
+  padding:9px 26px!important;
+  background:linear-gradient(180deg,rgba(4,22,30,.90),rgba(2,10,15,.94))!important;
+  border-color:rgba(65,226,255,.25)!important;
+  box-shadow:0 0 30px rgba(42,211,255,.07)!important;
+}
+.display-first #view-planet .cc-stage-label strong{font-size:16px!important;letter-spacing:.10em!important}
+.display-first #view-planet .cc-stage-label span{font-size:6px!important}
+.display-first #view-planet .cc-stability{left:26px!important;bottom:15%!important;opacity:.72!important;transform:none!important}
+.display-first #view-planet .cc-field-card{right:26px!important;bottom:15%!important;opacity:.72!important;transform:none!important}
+.display-first #view-planet .cc-layer-stack,
+.display-first #view-planet .cc-orbital-context{opacity:0!important;pointer-events:none!important}
+.display-first.df-hud-expanded #view-planet .cc-layer-stack,
+.display-first.df-hud-expanded #view-planet .cc-orbital-context{opacity:.92!important;transform:none!important}
+
+@media(max-width:900px){
+  .display-first #view-planet .cc-stability,.display-first #view-planet .cc-field-card{display:none!important}
+  #view-planet #planet-render-identity{right:8px!important;bottom:68px!important}
+}
+
+/* v1.9 concept scale: the one sphere reads as an exhibit, not the whole viewport. */
+#view-planet .planet-canvas-wrap>.cc-globe-layer,
+#view-planet .planet-canvas-wrap>.cc-globe-hud{
+  transform:scale(.87)!important;
+  transform-origin:50% 46.5%!important;
+  filter:saturate(.94) contrast(.96) drop-shadow(0 0 22px rgba(47,219,255,.12));
 }
