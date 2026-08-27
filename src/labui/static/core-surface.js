@@ -28,6 +28,40 @@
   const space = makeCanvas("core-space-surface", "core-space-surface", base);
   const planet = makeCanvas("core-planet-surface", "core-planet-surface", base);
 
+  // Station 01 has one visual owner. The legacy canvas remains only as the
+  // pointer/gesture hit surface. Use inline !important declarations so no
+  // historical or future stylesheet can turn its opaque black bitmap back on.
+  function enforceRenderContract() {
+    wrap.style.setProperty("position", "relative", "important");
+    wrap.style.setProperty("isolation", "isolate", "important");
+    for (const canvas of [space, planet]) {
+      canvas.style.setProperty("position", "absolute", "important");
+      canvas.style.setProperty("inset", "0", "important");
+      canvas.style.setProperty("width", "100%", "important");
+      canvas.style.setProperty("height", "100%", "important");
+      canvas.style.setProperty("display", "block", "important");
+      canvas.style.setProperty("visibility", "visible", "important");
+      canvas.style.setProperty("pointer-events", "none", "important");
+    }
+    space.style.setProperty("z-index", "1", "important");
+    space.style.setProperty("opacity", "1", "important");
+    planet.style.setProperty("z-index", "4", "important");
+    planet.style.setProperty("opacity", "1", "important");
+    planet.style.setProperty("background", "transparent", "important");
+
+    base.style.setProperty("position", "absolute", "important");
+    base.style.setProperty("inset", "0", "important");
+    base.style.setProperty("width", "100%", "important");
+    base.style.setProperty("height", "100%", "important");
+    base.style.setProperty("opacity", "0", "important");
+    base.style.setProperty("visibility", "visible", "important");
+    base.style.setProperty("background", "transparent", "important");
+    base.style.setProperty("pointer-events", "auto", "important");
+    base.style.setProperty("z-index", "15", "important");
+    wrap.dataset.coreRenderContract = "single-owner";
+  }
+  enforceRenderContract();
+
   function context(canvas, maxDpr = 1.6) {
     const rect = wrap.getBoundingClientRect();
     const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
@@ -158,9 +192,9 @@
   if(typeof ResizeObserver==="function"){resizeObserver=new ResizeObserver(schedule);resizeObserver.observe(wrap);}
   wrap.addEventListener("pointermove",event=>{const r=wrap.getBoundingClientRect();if(r.width&&r.height){pointerX=((event.clientX-r.left)/r.width-.5)*2;pointerY=((event.clientY-r.top)/r.height-.5)*2;}schedule();},{passive:true});
   base.addEventListener("pointerup",schedule,{passive:true});
-  window.addEventListener("resize",schedule,{passive:true});
+  window.addEventListener("resize",()=>{enforceRenderContract();schedule();},{passive:true});
   document.querySelectorAll('.nav-button[data-view="planet"]').forEach(button=>button.addEventListener("click",()=>setTimeout(schedule,0)));
-  for(const ms of [0,40,160,500,1200])setTimeout(schedule,ms);
+  for(const ms of [0,40,160,500,1200])setTimeout(()=>{enforceRenderContract();schedule();},ms);
 
   function animate(time){
     if(app?.view==="planet" && time-lastSpaceFrame>33){lastSpaceFrame=time;try{drawSpace(time);}catch(error){console.error("Guaranteed space renderer failed.",error);}}
