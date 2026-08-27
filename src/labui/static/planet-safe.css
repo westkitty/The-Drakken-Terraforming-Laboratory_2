@@ -1,0 +1,86 @@
+/* v1.8.6 Station 01 hard visibility contract.
+   This file is linked directly by index.html after the server-injected presentation
+   styles, so it is the final stylesheet in the cascade. */
+#view-planet .planet-canvas-wrap{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  background:#000205!important;
+}
+#view-planet #planet-static-scene{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:2!important;
+  pointer-events:none!important;
+}
+#view-planet #planet-render-identity{
+  position:absolute!important;
+  right:16px!important;
+  bottom:14px!important;
+  z-index:31!important;
+  display:block!important;
+  visibility:visible!important;
+  opacity:.78!important;
+  padding:5px 8px!important;
+  border:1px solid rgba(53,232,255,.22)!important;
+  background:rgba(1,9,14,.72)!important;
+  color:#65dff3!important;
+  font:700 7px/1.2 ui-monospace,SFMono-Regular,Menlo,monospace!important;
+  letter-spacing:.14em!important;
+  pointer-events:none!important;
+}
+/* The historical canvas is input only. It must never be a visual layer. */
+#view-planet .planet-canvas-wrap>#planet-canvas{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  display:block!important;
+  visibility:visible!important;
+  opacity:0!important;
+  background:transparent!important;
+  z-index:30!important;
+  pointer-events:auto!important;
+}
+/* The v1.8.6 dynamic solver canvas may enhance the permanent SVG body. */
+#view-planet .planet-canvas-wrap>.core-planet-surface{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  background:transparent!important;
+  z-index:4!important;
+  pointer-events:none!important;
+}
+/* Static SVG owns deep space. Disable duplicate historical Planet render surfaces. */
+#view-planet .planet-canvas-wrap>.core-space-surface,
+#view-planet .planet-canvas-wrap>.cc-globe-layer,
+#view-planet .planet-canvas-wrap>.v17-space-layer,
+#view-planet .planet-canvas-wrap>.v17-globe-layer,
+#view-planet .planet-canvas-wrap>.v18-lighting-overlay,
+#view-planet .planet-canvas-wrap>.v18-orbital-overlay{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+}
+/* Keep state/HUD overlays above the actual scene without giving them a background. */
+#view-planet .planet-canvas-wrap>.cc-globe-hud{z-index:10!important;background:transparent!important}
+#view-planet .planet-canvas-wrap>.cc-state-fx{z-index:11!important;background:transparent!important}
+#view-planet .planet-canvas-wrap>.canvas-hud{z-index:32!important}
+#view-planet .planet-canvas-wrap>.cc-stage-label,
+#view-planet .planet-canvas-wrap>.cc-floating-panel{z-index:20!important}
+/* The old pseudo-element fallback is superseded by real SVG markup. */
+#view-planet .planet-canvas-wrap::before{display:none!important}
+
+@media (max-width:720px){
+  #view-planet #planet-render-identity{right:8px!important;bottom:70px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  #view-planet #planet-static-scene *{animation:none!important}
+}
