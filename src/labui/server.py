@@ -176,11 +176,11 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             text = candidate.read_text(encoding="utf-8")
             text = text.replace(
                 '<link rel="stylesheet" href="/static/styles.css">',
-                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">',
+                '<link rel="stylesheet" href="/static/styles.css">\n  <link rel="stylesheet" href="/static/incubator.css">\n  <link rel="stylesheet" href="/static/command-center.css">\n  <link rel="stylesheet" href="/static/state-transitions.css">\n  <link rel="stylesheet" href="/static/display-first.css">\n  <link rel="stylesheet" href="/static/core-surface.css">\n  <link rel="stylesheet" href="/static/system-view.css">\n  <link rel="stylesheet" href="/static/celestial-interaction.css">',
             )
             text = text.replace(
                 '<script src="/static/app.js"></script>',
-                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>\n  <script src="/static/display-first.js"></script>\n  <script src="/static/system-view.js"></script>\n  <script src="/static/celestial-interaction.js"></script>',
+                '<script src="/static/app.js"></script>\n  <script src="/static/incubator.js"></script>\n  <script src="/static/command-center.js"></script>\n  <script src="/static/state-transitions.js"></script>\n  <script src="/static/display-first.js"></script>\n  <script src="/static/core-surface.js"></script>\n  <script src="/static/system-view.js"></script>\n  <script src="/static/celestial-interaction.js"></script>',
             )
             payload = text.encode("utf-8")
         else:
