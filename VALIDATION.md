@@ -1,5 +1,29 @@
 # Validation and Requirement Traceability
 
+## v1.8.6 Station 01 visibility repair
+
+User-path evidence disproved v1.8.5: the same macOS browser path still rendered the unchanged blank Planet stage. v1.8.6 therefore moves the final fallback out of Canvas/WebGL entirely. The base celestial scene is a static SVG resource inserted into the served Station 01 HTML before browser scripts execute; a direct last-loaded safety stylesheet/script makes the legacy canvas input-only and exposes a visible build identity.
+
+| Check | Evidence | Result |
+|---|---|---|
+| Full Python suite | `PYTHONPATH=src pytest -q` | PASS — 65 tests |
+| Python compilation | `PYTHONPATH=src python -m compileall -q src` | PASS |
+| JavaScript syntax | `node --check` on every shipped JS asset | PASS |
+| Static body exists without JS | served HTML contains `#planet-static-scene` before `#planet-canvas`; `/static/planet-base.svg` contains the central planet and distant system | PASS |
+| Safety assets are truly last | served HTML asserts `planet-safe.css/js` occur after server-injected celestial/core assets | PASS |
+| Legacy canvas cannot cover scene | last stylesheet + last script force `#planet-canvas` transparent while retaining pointer input | PASS |
+| Duplicate Planet renderers suppressed | command-center/v1.7/v1.8 Planet visual canvases disabled by final contract | PASS |
+| Dynamic solver layer remains additive | `core-planet-surface` may render above permanent SVG base | PASS |
+| Static SVG renders independently | exact `/static/planet-base.svg` resource rendered successfully to PNG with CairoSVG | PASS |
+| Managed Chromium pixel journey | Chromium hangs in container DBus/zygote startup before screenshot | NOT CLAIMED |
+| Exact-port launch guard | occupied requested port returns failure instead of silently spawning another build on 8766+ | PASS |
+| Active-build identity | terminal, `/api/health`, launch query, header, and scene badge all expose v1.8.6 identity | PASS |
+| Same-path user macOS pixels | exact required completion evidence | PENDING |
+
+The Planet display remains **implemented-unverified**, not verified, until the user sees the new scene on the same Mac/browser path.
+
+---
+
 Validation date: 2026-08-27  
 Repository version: 1.8.5
 

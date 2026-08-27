@@ -6,10 +6,10 @@
   "project_name": "The Drakken Terraforming Laboratory",
   "project_root": "/mnt/data/drakken-terraforming-laboratory",
   "artifact_path": "",
-  "state_revision": 5,
-  "last_updated": "2026-08-27T03:15:00Z",
+  "state_revision": 6,
+  "last_updated": "2026-08-27T03:32:00Z",
   "current_baseline": {
-    "identity": "repository v1.8.5 / single-owner Planet stacking repair",
+    "identity": "repository v1.8.6 / non-canvas base scene repair",
     "state": "implemented-unverified",
     "last_verified": null
   },
@@ -95,13 +95,13 @@ Deliver a complete executable repository with the user-requested source layout, 
 
 ## 6. Known Not Working
 <!-- operational-state:entry
-{"id":"BKN-001","title":"Planet visualization absent on user macOS path through v1.8.4","state":"failed","capability":"Station 01 should visibly render the planet and celestial environment.","scope":"browser UI / Planet station","evidence":"Repeated same-path user macOS screenshots show shell/state/controls loaded while Station 01 remains blank through v1.8.4. User reported a brief reload glow before the stage returns blank.","diagnosis":"The reload flash exposed a late cascade overwrite: system-view.css and celestial-interaction.css each re-promoted the legacy #planet-canvas to opacity:1 !important. That canvas contains an opaque black frame and sits above the replacement scene, covering the fallback sphere, starfield, rendered planet, and low-level effects. Earlier app-binding and fallback fixes were therefore masked.","last_checked":"2026-08-26","status":"active","recheck_trigger":"User visually confirms v1.8.5 or later on the same Mac browser path"}
+{"id":"BKN-001","title":"Planet visualization absent on user macOS path through v1.8.5","state":"failed","capability":"Station 01 should visibly render the planet and celestial environment.","scope":"browser UI / Planet station","evidence":"Repeated same-path user macOS evidence shows shell/state/controls loaded while Station 01 remains visually unchanged through v1.8.5. v1.8.3 briefly flashed a glow during reload; v1.8.5 produced no improvement.","diagnosis":"v1.8.5 disproved the prior cascade-only diagnosis: even after removing known canvas-opacity conflicts, the same user path remained unchanged. The exact late-render failure is therefore still unresolved. v1.8.6 deliberately bypasses that uncertainty by placing the minimum visible celestial scene in a static SVG resource inserted into the HTML response before scripts run, with an independent final safety layer and active-build identity.","last_checked":"2026-08-26","status":"active","recheck_trigger":"User visually confirms v1.8.6 or later on the same Mac browser path"}
 -->
-### BKN-001 — Planet visualization absent on user macOS path through v1.8.4
+### BKN-001 — Planet visualization absent on user macOS path through v1.8.5
 - **State:** `failed`
 - **Capability:** Station 01 should visibly render the planet and celestial environment.
-- **Evidence:** Repeated same-path macOS screenshots show a live shell/state/control path with a blank visualization stage through v1.8.4; reload briefly flashes the emergency glow before returning to black.
-- **Root cause:** two later optional stylesheets re-promoted the legacy `#planet-canvas` to full opacity. Its opaque black bitmap sat above the replacement surfaces and covered the scene. The earlier lexical-binding bug was real, but fixing it did not remove this later cascade overwrite.
+- **Evidence:** Repeated same-path macOS screenshots show a live shell/state/control path with a blank visualization stage through v1.8.5; the latest same-path report explicitly states there is no improvement.
+- **Current diagnosis:** prior canvas-binding/cascade explanations were real defects but were not sufficient; v1.8.5 still showed no improvement on the same Mac path. The exact dynamic-render failure remains unresolved. A second plausible route-level failure was also identified: the launcher silently searched 8766–8775 when 8765 was occupied, which could leave a user reloading an older server tab. That explanation is inferred, not confirmed. v1.8.6 bypasses the renderer chain with a pre-script static SVG scene and removes silent port hopping while exposing the active build identity.
 - **Status:** active until the repaired user path is visually confirmed.
 <!-- /operational-state:entry -->
 
@@ -127,20 +127,31 @@ Deliver a complete executable repository with the user-requested source layout, 
 <!-- /operational-state:entry -->
 
 <!-- operational-state:entry
-{"id":"IMP-003","title":"v1.8.5 single-owner Planet stacking repair","state":"implemented-unverified","capability":"Station 01 has one guaranteed visual owner: dedicated core space and planet surfaces. The legacy #planet-canvas is forced transparent with an inline !important contract while retaining pointer input; duplicate legacy globe canvases are disabled; core-surface.css is served last.","scope":"browser UI / Planet station","evidence":"58-test suite, Python compile, all JS parse, explicit served-order regression, conflicting-opacity regression, inline cascade guard; same-path macOS pixels still pending.","artifact_revision":"v1.8.5","last_checked":"2026-08-27T03:15:00Z","status":"active","recheck_trigger":"Visual confirmation on the user macOS browser path"}
+{"id":"IMP-003","title":"v1.8.5 single-owner Planet stacking repair","state":"failed","capability":"Station 01 was intended to have one guaranteed visual owner: dedicated core space and planet surfaces. The legacy #planet-canvas was forced transparent with an inline !important contract while retaining pointer input; duplicate legacy globe canvases were disabled; core-surface.css was served last.","scope":"browser UI / Planet station","evidence":"58-test suite, Python compile, all JS parse, explicit served-order regression, conflicting-opacity regression, inline cascade guard; same-path macOS pixels still pending.","artifact_revision":"v1.8.5","last_checked":"2026-08-27T03:15:00Z","status":"superseded","recheck_trigger":"none"}
 -->
 ### IMP-003 — v1.8.5 single-owner Planet stacking repair
-- **State:** `implemented-unverified`
+- **State:** `failed`
 - **Capability:** Dedicated core space/planet surfaces own Station 01; the legacy canvas remains pointer-active but permanently transparent through inline `!important`; duplicate legacy globe/space canvases are disabled; the final stacking contract is served last.
 - **Evidence:** 58 passing tests, Python compilation, all shipped JavaScript syntax checks, stylesheet-order regression, and explicit guards against either optional celestial stylesheet re-promoting the legacy canvas.
 - **Artifact revision:** v1.8.5
+- **Status:** `superseded` after same-path user evidence reported no improvement.
+<!-- /operational-state:entry -->
+
+<!-- operational-state:entry
+{"id":"IMP-004","title":"v1.8.6 non-canvas base scene and last-load safety contract","state":"implemented-unverified","capability":"Station 01 contains a static SVG celestial scene inserted into the served Station 01 HTML before browser scripts execute, independent of Canvas2D/WebGL/application state. planet-safe.css/js load after every optional presentation layer, keep the legacy canvas pointer-active but visually transparent, suppress duplicate Planet renderers, and expose a visible v1.8.6 scene identity.","scope":"browser UI / Planet station","evidence":"65-test suite, Python compile, all JS parse, served-order regressions, static SVG extraction and independent CairoSVG render; same-path macOS pixels still pending.","artifact_revision":"v1.8.6","last_checked":"2026-08-27T03:32:00Z","status":"active","recheck_trigger":"Visual confirmation on the user macOS browser path"}
+-->
+### IMP-004 — v1.8.6 non-canvas base scene and last-load safety contract
+- **State:** `implemented-unverified`
+- **Capability:** A static SVG planet/star-system scene is present in the served HTML before browser scripts and cannot depend on renderer startup. A final direct stylesheet/script pair owns Station 01 visibility, leaves the old canvas input-only, suppresses duplicate visual canvases, and shows `SCENE 1.8.6 // SVG BASE` as active-build proof.
+- **Evidence:** 65 passing tests, Python compilation, all JS syntax checks, served-order guards, and independent SVG-to-PNG rendering.
+- **Artifact revision:** v1.8.6
 <!-- /operational-state:entry -->
 
 ## 8. Unknown or Evidence-Stale State
 Exact bitwise floating-point identity across different CPU architectures and different NumPy builds was not claimed. Determinism is verified under the supported single-process update path and strongest when Python/NumPy versions are pinned identically.
 
 ## 9. Pending Work
-- Visually confirm v1.8.5 on the same user macOS browser path that demonstrated BKN-001 before promoting the Planet display to verified.
+- Visually confirm v1.8.6 on the same user macOS browser path that demonstrated BKN-001. The visible `SCENE 1.8.6 // SVG BASE` marker is also the active-build identity check.
 
 ## 10. Active Decisions, Defaults, and Prohibitions
 - Python 3.11+ with NumPy and Rich.
@@ -149,6 +160,7 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 - Historical qualitative catastrophe magnitudes are represented as lower bounds rather than fabricated exact counts.
 - Aureal Gate is anchored at Year 170; no extra exact war-casualty precision is invented.
 - No placeholders, TODOs, stubbed `pass`, or allegorical replacements for canonical physics.
+- Dashboard launch must bind the requested port exactly; it must not silently start a second laboratory instance on another port.
 
 ## 11. Validation and Evidence Matrix
 | ID | Capability / invariant | State | Evidence | Required recheck | Recheck trigger |
@@ -157,14 +169,16 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 | INV-002 | Absolute Syrin nullification | verified | executor + scenario tests | rerun affected tests | nullifier/runtime changes |
 | INV-003 | Deterministic bounded execution | verified | reproducibility, budget, telemetry tests | rerun full deterministic suite | executor/scenario/hash changes |
 | VER-001 | Complete repository baseline | verified | VALIDATION.md | full validation ladder | any repository change |
-| BKN-001 | Planet visible on user macOS path | failed through v1.8.4 | repeated user screenshots + reload flash report | same-path visual check | Planet rendering changes |
+| BKN-001 | Planet visible on user macOS path | failed through v1.8.5 | repeated same-path user evidence | same-path visual check | Planet rendering changes |
 | IMP-002 | v1.8.4 lexical binding + persistent fallback repair | failed/superseded | same-path user evidence | none | superseded by v1.8.5 |
-| IMP-003 | v1.8.5 single-owner stacking repair | implemented-unverified | 58 tests + compile + JS parse + cascade/order guards | same-path visual check | user confirms v1.8.5 |
+| IMP-003 | v1.8.5 single-owner stacking repair | failed/superseded | same-path user evidence: no improvement | none | superseded by v1.8.6 |
+| IMP-004 | v1.8.6 non-canvas base scene | implemented-unverified | 65 tests + compile + JS parse + static SVG render + served-order guards | same-path visual check | user confirms v1.8.6 |
 
 ## 12. Current Change Scope and Impact Radius
-Current change scope is the bounded Planet-station visibility repair. Preserve INV-001 through INV-003 and the display-first interaction shell while repairing BKN-001. Station 01 now uses one visual owner; future presentation layers must not re-promote the legacy hit canvas or add competing opaque globe canvases. Do not promote Planet rendering to verified until the same macOS path that reproduced the failure visibly confirms it.
+Current change scope is the bounded Planet-station visibility repair. Preserve INV-001 through INV-003 and the display-first interaction shell while repairing BKN-001. v1.8.5 is disproved on the real user path. v1.8.6 moves the minimum visible scene into a static SVG resource inserted into the served HTML and keeps dynamic renderers additive only. Do not promote Planet rendering to verified until the same macOS path that reproduced the failure visibly confirms the SVG scene and active-build marker.
 
 ## 13. Compact Revision Log
+- **Revision 6 — 2026-08-27:** User disproved v1.8.5 with “no improvement.” The repair strategy changed categories: Station 01 now contains a static SVG celestial scene inserted into the served HTML plus a final safety stylesheet/script and visible build identity. Canvas/WebGL layers are enhancements only; duplicate Planet renderers are suppressed. The launcher now refuses silent port hopping and exposes the build in the terminal, health endpoint, query string, header, and scene badge. User-path verification remains pending.
 - **Revision 5 — 2026-08-27:** User disproved v1.8.4. Reload-flash analysis and full CSS-order audit found two later celestial stylesheets re-promoting the opaque legacy Planet canvas above the replacement scene. v1.8.5 removes both promotions, moves the core CSS contract last, adds inline `!important` transparency for the hit canvas, disables duplicate Station 01 globe renderers, and adds cascade regressions. User-path verification remains pending.
 - **Revision 4 — 2026-08-27:** User disproved v1.8.3 and reported a brief reload glow before the stage returned blank. Root cause isolated to `globalThis.app` misuse plus starfield/fallback z-order. Added v1.8.4 lexical-binding and persistent-fallback repair as implemented-unverified.
 - **Revision 3 — 2026-08-27:** Recorded the v1.8.2 macOS blank Planet viewport as BKN-001 and v1.8.3 independent core rendering as implemented-unverified pending same-path visual confirmation.

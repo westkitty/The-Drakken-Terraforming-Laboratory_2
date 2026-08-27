@@ -6,6 +6,7 @@
   <meta name="color-scheme" content="dark">
   <title>The Drakken Terraforming Laboratory</title>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/planet-safe.css">
 </head>
 <body>
   <div class="app-shell">
@@ -70,6 +71,8 @@
                 <div id="planet-hash">HASH —</div>
               </div>
               <div class="canvas-wrap planet-canvas-wrap">
+                <img id="planet-static-scene" class="planet-static-scene" src="/static/planet-base.svg" alt="" aria-hidden="true">
+                <div id="planet-render-identity" class="planet-render-identity" data-build="1.8.6">SCENE 1.8.6 // SVG BASE</div>
                 <canvas id="planet-canvas" aria-label="Interactive planetary simulation"></canvas>
                 <div class="canvas-hud top-left">
                   <span>DRAG</span> rotate &nbsp;·&nbsp; <span>CLICK</span> commit active tool
@@ -317,5 +320,6 @@ ASSERT pulse == 6</textarea>
 
   <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
   <script src="/static/app.js"></script>
+  <script src="/static/planet-safe.js"></script>
 </body>
 </html>
