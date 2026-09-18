@@ -14,5 +14,6 @@ v1.9 keeps the existing six-station Drakken Terraforming Laboratory and adds a v
 - CLI parity is provided through the existing drakken-lab command under the experiment subcommand family.
 - Manual browser station actions are routed through the same experiment action ledger so current work can be recorded and exported.
 - A native macOS AppKit/WebKit wrapper now hosts the same six-station laboratory in its own window, launches the exact localhost backend when necessary, preserves WebKit persistent storage, supports import/export, rejects stale backend identity and keeps external navigation outside the wrapper.
+- Wrapper window-close behavior is lifecycle-safe: closing hides the native window without killing the owned laboratory backend; application reopen restores the window, while explicit app quit owns termination.
 
 Historical Planet-render verification remains separate. v1.9 experiment tests do not convert unresolved same-path visual evidence into a verified claim.

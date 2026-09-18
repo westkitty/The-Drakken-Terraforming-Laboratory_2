@@ -19,9 +19,10 @@ The local macOS wrapper is a native AppKit/WebKit shell over the existing six-st
 | Gatekeeper distribution assessment | `spctl --assess` rejects ad-hoc local build | EXPECTED — not a distribution release |
 | Installed artifact | `~/Applications/Drakken Terraforming Laboratory.app` | PASS |
 | LaunchServices open | installed app opened through `open`; wrapper process remained alive | PASS |
+| Window lifecycle guard | close is intercepted as hide; backend remains owned until real app termination; application reopen path is implemented | PASS — runtime close interception + source regression |
 | Owned backend launch | `.venv` Python dashboard child remains alive on 127.0.0.1:8765 | PASS |
 | Runtime health | repeated `/api/health` returned product v1.9.0 and correct UI build | PASS |
-| Full Python suite after wrapper work | `.venv/bin/python -m pytest -q` | PASS — 85 tests |
+| Full Python suite after wrapper work | `.venv/bin/python -m pytest -q` | PASS — 86 tests |
 | Python compilation | `.venv/bin/python -m compileall -q src` | PASS |
 | Shipped JS syntax | `node --check` on every shipped JS file | PASS |
 | Wrapper build-script syntax | `zsh -n macos/build_macos_wrapper.sh` | PASS |

@@ -387,6 +387,7 @@ The wrapper:
 - keeps JSON import working through the native file picker
 - opens non-local HTTP/HTTPS links in the system browser rather than inside the laboratory wrapper
 - writes backend launch logs to `~/Library/Logs/DrakkenLabWrapper/backend.log`
+- treats the red window-close control as hide, not quit; reopening the app restores the same wrapper window while Cmd-Q performs real app termination
 
 Build it from the repository root:
 

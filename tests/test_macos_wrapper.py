@@ -62,3 +62,15 @@ def test_wrapper_build_script_is_reproducible_and_keeps_build_output_untracked()
     assert "codesign --force --deep --sign -" in script
     assert "codesign --verify --deep --strict" in script
     assert "macos/build/" in ignore
+
+
+def test_wrapper_window_lifecycle_does_not_kill_backend_on_close() -> None:
+    source = (MACOS / "DrakkenLabWrapper.swift").read_text(encoding="utf-8")
+
+    assert "WKUIDelegate, NSWindowDelegate" in source
+    assert "applicationShouldTerminateAfterLastWindowClosed" in source
+    assert "return false" in source
+    assert "applicationShouldHandleReopen" in source
+    assert "windowShouldClose" in source
+    assert "sender.orderOut(nil)" in source
+    assert "window.delegate = self" in source
