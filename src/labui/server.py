@@ -12,6 +12,7 @@ import webbrowser
 
 from core.errors import DrakkenLabError
 from .session import LaboratorySession
+from .experiments import compare_records, validate_record
 
 
 STATIC_ROOT = Path(__file__).with_name("static")
@@ -53,6 +54,20 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(payload)
             return
+        if path == "/api/experiments":
+            self._json(self.server.session.experiments.status())
+            return
+        if path == "/api/experiment/export":
+            record = self.server.session.experiments.record_current()
+            payload = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Disposition", 'attachment; filename="drakken-experiment.json"')
+            self.send_header("Content-Length", str(len(payload)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(payload)
+            return
         if path == "/":
             self._static("index.html")
             return
@@ -66,51 +81,64 @@ class LaboratoryRequestHandler(BaseHTTPRequestHandler):
         try:
             body = self._body_json()
             routes: dict[str, Callable[[dict[str, Any]], Any]] = {
-                "/api/reset": lambda _: self.server.session.reset(),
-                "/api/planet/brush": lambda data: self.server.session.apply_brush(
-                    tool=str(data.get("tool", "")),
-                    row=int(data.get("row", -1)),
-                    col=int(data.get("col", -1)),
-                    intensity=float(data.get("intensity", 50.0)),
-                    radius=int(data.get("radius", 3)),
+                "/api/reset": lambda _: self.server.session.experiments.apply_action("system.reset", {}, record=False),
+                "/api/planet/brush": lambda data: self.server.session.experiments.apply_action("planet.brush", {
+                    "tool": str(data.get("tool", "")),
+                    "row": int(data.get("row", -1)),
+                    "col": int(data.get("col", -1)),
+                    "intensity": float(data.get("intensity", 50.0)),
+                    "radius": int(data.get("radius", 3)),
+                }, record=False),
+                "/api/planet/step": lambda data: self.server.session.experiments.apply_action("planet.step", {
+                    "seconds": float(data.get("seconds", 1.0))
+                }, record=False),
+                "/api/syrin/inject": lambda data: self.server.session.experiments.apply_action("syrin.inject", {
+                    "contact_fraction": float(data.get("contact_fraction", 1e-12))
+                }, record=False),
+                "/api/star/withdraw": lambda data: self.server.session.experiments.apply_action("star.withdraw", {
+                    "fraction": float(data.get("fraction", 0.1))
+                }, record=False),
+                "/api/macro/load": lambda data: self.server.session.experiments.apply_action("macro.load", {"source": str(data.get("source", ""))}, record=False),
+                "/api/macro/step": lambda _: self.server.session.experiments.apply_action("macro.step", {}, record=False),
+                "/api/macro/run": lambda _: self.server.session.experiments.apply_action("macro.run", {}, record=False),
+                "/api/starbinding/dive": lambda data: self.server.session.experiments.apply_action("starbinding.dive", {
+                    "offset_radii": float(data.get("offset_radii", 0.0)),
+                    "angle_deg": float(data.get("angle_deg", 0.0)),
+                    "velocity_fraction_c": float(data.get("velocity_fraction_c", 0.2)),
+                    "withdrawal_fraction": float(data.get("withdrawal_fraction", 1.0)),
+                }, record=False),
+                "/api/starbinding/wave": lambda data: self.server.session.experiments.apply_action("starbinding.wave", {
+                    "simulated_stars": int(data.get("simulated_stars", 16)),
+                    "represented_per_star": int(data.get("represented_per_star", 250_000_000)),
+                }, record=False),
+                "/api/siege-wall/configure": lambda data: self.server.session.experiments.apply_action("siege.configure", {
+                    "singularities": int(data.get("singularities", 8)),
+                    "nodes": int(data.get("nodes", 12)),
+                    "capacity_m_s2": float(data.get("capacity_m_s2", 0.05)),
+                }, record=False),
+                "/api/specimen/hatch": lambda data: self.server.session.experiments.apply_action("specimen.hatch", {
+                    "profile_id": str(data.get("profile_id", "experimental_egg")),
+                    "row": int(data.get("row", 18)),
+                    "col": int(data.get("col", 36)),
+                    "phenotype": (data.get("phenotype") if isinstance(data.get("phenotype"), dict) else None),
+                }, record=False),
+                "/api/specimen/pulse": lambda data: self.server.session.experiments.apply_action("specimen.pulse", {
+                    "steps": int(data.get("steps", 1)),
+                }, record=False),
+                "/api/specimen/terminate": lambda _: self.server.session.experiments.apply_action("specimen.terminate", {}, record=False),
+                "/api/experiment/run-preset": lambda data: self.server.session.experiments.run_preset(str(data.get("preset_id", ""))),
+                "/api/experiment/record": lambda _: self.server.session.experiments.record_current(),
+                "/api/experiment/import": lambda data: self.server.session.experiments.load(validate_record(data.get("experiment", {}))),
+                "/api/experiment/replay/start": lambda _: self.server.session.experiments.start_replay(),
+                "/api/experiment/replay/step": lambda _: self.server.session.experiments.replay_step(),
+                "/api/experiment/replay/run": lambda _: self.server.session.experiments.replay_all(),
+                "/api/experiment/replay/pause": lambda _: self.server.session.experiments.pause(),
+                "/api/experiment/replay/reset": lambda _: self.server.session.experiments.reset_replay(),
+                "/api/experiment/replay/jump": lambda data: self.server.session.experiments.jump(str(data.get("label", ""))),
+                "/api/experiment/compare": lambda data: compare_records(
+                    validate_record(data.get("a", {})),
+                    validate_record(data.get("b", {})),
                 ),
-                "/api/planet/step": lambda data: self.server.session.step_planet(
-                    seconds=float(data.get("seconds", 1.0))
-                ),
-                "/api/syrin/inject": lambda data: self.server.session.inject_syrin(
-                    contact_fraction=float(data.get("contact_fraction", 1e-12))
-                ),
-                "/api/star/withdraw": lambda data: self.server.session.withdraw_star(
-                    fraction=float(data.get("fraction", 0.1))
-                ),
-                "/api/macro/load": lambda data: self.server.session.load_macro(source=str(data.get("source", ""))),
-                "/api/macro/step": lambda _: self.server.session.macro_step(),
-                "/api/macro/run": lambda _: self.server.session.macro_run(),
-                "/api/starbinding/dive": lambda data: self.server.session.starbinding_dive(
-                    offset_radii=float(data.get("offset_radii", 0.0)),
-                    angle_deg=float(data.get("angle_deg", 0.0)),
-                    velocity_fraction_c=float(data.get("velocity_fraction_c", 0.2)),
-                    withdrawal_fraction=float(data.get("withdrawal_fraction", 1.0)),
-                ),
-                "/api/starbinding/wave": lambda data: self.server.session.starbinding_wave(
-                    simulated_stars=int(data.get("simulated_stars", 16)),
-                    represented_per_star=int(data.get("represented_per_star", 250_000_000)),
-                ),
-                "/api/siege-wall/configure": lambda data: self.server.session.configure_siege_wall(
-                    singularities=int(data.get("singularities", 8)),
-                    nodes=int(data.get("nodes", 12)),
-                    capacity_m_s2=float(data.get("capacity_m_s2", 0.05)),
-                ),
-                "/api/specimen/hatch": lambda data: self.server.session.hatch_specimen(
-                    profile_id=str(data.get("profile_id", "experimental_egg")),
-                    row=int(data.get("row", 18)),
-                    col=int(data.get("col", 36)),
-                    phenotype=(data.get("phenotype") if isinstance(data.get("phenotype"), dict) else None),
-                ),
-                "/api/specimen/pulse": lambda data: self.server.session.pulse_specimen(
-                    steps=int(data.get("steps", 1)),
-                ),
-                "/api/specimen/terminate": lambda _: self.server.session.terminate_specimen(),
             }
             action = routes.get(path)
             if action is None:

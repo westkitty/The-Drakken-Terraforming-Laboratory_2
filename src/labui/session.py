@@ -27,6 +27,7 @@ from sim.lattice.wall import SiegeWallLattice
 from sim.terraforming.engine import TerraformingEngine
 from sim.terraforming.grids import AtmosphericGrid, LithosphereGrid, ThermalGrid
 from .specimens import SPECIMEN_PROFILES, profile_catalog
+from .experiments import ExperimentController
 
 
 LAB_ROWS = 36
@@ -67,6 +68,7 @@ class LaboratorySession:
         self._specimen_history: deque[dict[str, Any]] = deque(maxlen=160)
         self._specimen_sequence = 0
         self._reset_world(initial=True)
+        self.experiments = ExperimentController(self)
 
     # ------------------------------------------------------------------
     # Session lifecycle and deterministic presentation snapshots
@@ -113,6 +115,7 @@ class LaboratorySession:
         self._specimen = None
         self._specimen_history.clear()
         self._specimen_sequence = 0
+        self._stellar_step = 0
         self._macro_source = ""
         self._macro_instructions = []
         self._macro_cursor = 0
@@ -189,6 +192,7 @@ class LaboratorySession:
                     "history": list(self._specimen_history),
                 },
                 "telemetry": list(self._telemetry),
+                "experiments": self.experiments.status() if hasattr(self, "experiments") else None,
             }
 
     # ------------------------------------------------------------------
@@ -301,7 +305,8 @@ class LaboratorySession:
             if core.state is StarCoreState.COLLAPSED:
                 raise DrakkenLabError("stellar core has already collapsed")
             amount = core.starsilk_capacity * Decimal(str(fraction))
-            event = self.runtime.star_registry.withdraw(LAB_STAR_ID, amount, step=self._revision + 1)
+            self._stellar_step += 1
+            event = self.runtime.star_registry.withdraw(LAB_STAR_ID, amount, step=self._stellar_step)
             self._record(
                 "stellar",
                 "Stellar-core Starsilk withdrawal",
@@ -601,6 +606,78 @@ class LaboratorySession:
             )
             return self.snapshot()
 
+    def configure_siege_from_heliocide(self, *, nodes: int, capacity_m_s2: float) -> dict[str, Any]:
+        """Anchor the real current-session HeliocideEvent into a one-singularity lattice."""
+        with self._lock:
+            if not self.runtime.star_registry.events:
+                raise DrakkenLabError("no HeliocideEvent exists in the current session")
+            nodes = int(_clamp(float(nodes), 3.0, 72.0))
+            capacity_m_s2 = _clamp(_float(capacity_m_s2), 0.0001, 1.0)
+            event = self.runtime.star_registry.events[-1]
+            node_radius = 8.0e10
+            hole = BlackHoleRecord.from_heliocide(event, (0.0, 0.0, 0.0))
+            orbital_nodes = tuple(
+                OrbitalNode(
+                    node_id=f"NODE-{index:04d}",
+                    position_m=(
+                        node_radius * math.cos(2.0 * math.pi * index / nodes),
+                        node_radius * math.sin(2.0 * math.pi * index / nodes),
+                        0.0,
+                    ),
+                    capacity_m_s2=capacity_m_s2,
+                )
+                for index in range(nodes)
+            )
+            lattice = SiegeWallLattice(orbital_nodes)
+            lattice.anchor(hole)
+            fractured = False
+            fracture_reason = None
+            utilization: list[float] = []
+            loads: list[float] = []
+            try:
+                solution = lattice.stabilize()
+                utilization = [float(value) for value in solution.utilization.tolist()]
+                loads = [float(value) for value in solution.node_loads_m_s2.tolist()]
+            except LatticeFractureError as exc:
+                fractured = True
+                fracture_reason = str(exc)
+            self._siege_state = {
+                "source_heliocide_event_id": event.event_id,
+                "singularities": [{
+                    "id": hole.hole_id,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "horizon_radius_m": hole.horizon_radius_m,
+                }],
+                "nodes": [
+                    {
+                        "id": node.node_id,
+                        "x": node.position_m[0] / node_radius,
+                        "y": node.position_m[1] / node_radius,
+                        "capacity_m_s2": node.capacity_m_s2,
+                        "load_m_s2": loads[index] if index < len(loads) else None,
+                        "utilization": utilization[index] if index < len(utilization) else None,
+                    }
+                    for index, node in enumerate(orbital_nodes)
+                ],
+                "fractured": fractured,
+                "fracture_reason": fracture_reason,
+                "max_utilization": max(utilization) if utilization else None,
+            }
+            self._record(
+                "siege_wall",
+                "Current-session heliocide anchored into Siege Wall lattice",
+                {
+                    "source_heliocide_event_id": event.event_id,
+                    "nodes": nodes,
+                    "capacity_m_s2": capacity_m_s2,
+                    "fractured": fractured,
+                    "max_utilization": self._siege_state["max_utilization"],
+                    "fracture_reason": fracture_reason,
+                },
+            )
+            return self.snapshot()
+
     # ------------------------------------------------------------------
     # Drakken Egg / specimen incubator
     # ------------------------------------------------------------------
@@ -837,11 +914,12 @@ class LaboratorySession:
     def _record(self, kind: str, message: str, data: dict[str, Any]) -> None:
         self._event_sequence += 1
         self._revision += 1
-        self._telemetry.append(
-            {
-                "sequence": self._event_sequence,
-                "kind": kind,
-                "message": message,
-                "data": data,
-            }
-        )
+        event = {
+            "sequence": self._event_sequence,
+            "kind": kind,
+            "message": message,
+            "data": data,
+        }
+        self._telemetry.append(event)
+        if hasattr(self, "experiments"):
+            self.experiments.note_event(kind, message, data)

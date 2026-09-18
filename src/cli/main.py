@@ -18,6 +18,8 @@ from .dashboard import render_banner, render_report
 from .repl import run_repl
 from .telemetry import TelemetryLogger
 from labui.server import launch_laboratory
+from labui.session import LaboratorySession
+from labui.experiments import compare_records, export_record, import_record, preset_catalog, validate_record
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -52,6 +54,21 @@ def build_parser() -> argparse.ArgumentParser:
     dashboard.add_argument("--port", type=int, default=8765)
     dashboard.add_argument("--no-open", action="store_true", help="serve without opening a browser tab")
     sub.add_parser("report", help="print deterministic reference scenario reports in the terminal")
+
+    experiment = sub.add_parser("experiment", help="run, validate, replay, export, or compare deterministic experiments")
+    experiment_sub = experiment.add_subparsers(dest="experiment_command", required=True)
+    experiment_sub.add_parser("list", help="list experiment presets")
+    exp_run = experiment_sub.add_parser("run", help="run a named experiment preset")
+    exp_run.add_argument("preset")
+    exp_run.add_argument("--output", type=Path)
+    exp_run.add_argument("--overwrite", action="store_true")
+    exp_validate = experiment_sub.add_parser("validate", help="validate an experiment JSON file")
+    exp_validate.add_argument("file", type=Path)
+    exp_replay = experiment_sub.add_parser("replay", help="replay an experiment through real simulator logic")
+    exp_replay.add_argument("file", type=Path)
+    exp_compare = experiment_sub.add_parser("compare", help="compare two experiment records descriptively")
+    exp_compare.add_argument("a", type=Path)
+    exp_compare.add_argument("b", type=Path)
     return parser
 
 
@@ -107,6 +124,48 @@ def _run_macro(args: argparse.Namespace) -> int:
     return 0
 
 
+
+
+def _run_experiment(args: argparse.Namespace) -> int:
+    if args.experiment_command == "list":
+        print(json.dumps(preset_catalog(), indent=2, sort_keys=True))
+        return 0
+    if args.experiment_command == "validate":
+        record = import_record(args.file)
+        print(json.dumps({
+            "valid": True,
+            "experiment_id": record["experiment_id"],
+            "format_version": record["format_version"],
+            "final_state_hash": record["final_state_hash"],
+        }, indent=2, sort_keys=True))
+        return 0
+    if args.experiment_command == "run":
+        session = LaboratorySession()
+        record = session.experiments.run_preset(args.preset)
+        if args.output:
+            export_record(record, args.output, overwrite=args.overwrite)
+        print(json.dumps(record, indent=2, sort_keys=True))
+        return 0
+    if args.experiment_command == "replay":
+        record = import_record(args.file)
+        session = LaboratorySession()
+        session.experiments.load(record)
+        session.experiments.start_replay()
+        status = session.experiments.replay_all()
+        mismatch = status["replay"]["mismatch"]
+        print(json.dumps({
+            "experiment_id": record["experiment_id"],
+            "cursor": status["replay"]["cursor"],
+            "total": status["replay"]["total"],
+            "matched": mismatch is None,
+            "mismatch": mismatch,
+        }, indent=2, sort_keys=True))
+        return 0 if mismatch is None else 3
+    if args.experiment_command == "compare":
+        print(json.dumps(compare_records(import_record(args.a), import_record(args.b)), indent=2, sort_keys=True))
+        return 0
+    return 2
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "scenario":
@@ -127,6 +186,8 @@ def main(argv: list[str] | None = None) -> int:
         render_report("Siege Wall", run_siege_wall())
         render_report("Syrin Contamination Cascade", run_syrin_cascade())
         return 0
+    if args.command == "experiment":
+        return _run_experiment(args)
     return 2
 
 

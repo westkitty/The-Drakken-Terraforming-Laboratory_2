@@ -4,14 +4,14 @@
   "schema_version": 1,
   "project_id": "drakken-terraforming-laboratory",
   "project_name": "The Drakken Terraforming Laboratory",
-  "project_root": "/mnt/data/drakken-terraforming-laboratory",
+  "project_root": "/Users/andrew/The-Drakken-Terraforming-Laboratory_2",
   "artifact_path": "",
-  "state_revision": 6,
-  "last_updated": "2026-08-27T03:32:00Z",
+  "state_revision": 7,
+  "last_updated": "2026-09-18T19:53:52Z",
   "current_baseline": {
-    "identity": "repository v1.8.6 / non-canvas base scene repair",
-    "state": "implemented-unverified",
-    "last_verified": null
+    "identity": "repository v1.9.0 / deterministic experiment-session expansion",
+    "state": "partially-verified",
+    "last_verified": "2026-09-18T19:53:52Z"
   },
   "scope_boundaries": [
     "Deterministic computational Starsilk, stellar, terraforming, lattice, scenario, CLI, and test repository",
@@ -25,7 +25,7 @@
 The Drakken Terraforming Laboratory is a Python repository implementing deterministic Starsilk Macro execution, stellar-core collapse mechanics, planetary transformation grids, Siege Wall singularity anchoring, reproducible canonical scenarios, CLI tooling, telemetry, packaging, and tests.
 
 ## 2. Current Baseline
-Repository v1.0.0 is the verified baseline. Source tests, compile checks, CLI scenarios, wheel construction, package metadata, packaged-code execution, and placeholder scans all passed on 2026-08-26.
+Repository source is currently v1.9.0. The deterministic experiment-session expansion is verified by 81 passing tests, Python compilation, all shipped JavaScript syntax checks, CLI experiment round trips, and a bounded loopback dashboard replay smoke on 2026-09-18. Historical same-path Planet visual confirmation remains unresolved and is therefore not promoted to verified by the experiment work.
 
 ## 3. Artifact Contract
 Deliver a complete executable repository with the user-requested source layout, no placeholders/TODO stubs, deterministic physics behavior, CLI, scenarios, README, package configuration, and comprehensive tests.
@@ -76,6 +76,16 @@ Deliver a complete executable repository with the user-requested source layout, 
 - **Recheck trigger:** Any executor, hashing, scenario, or telemetry change
 <!-- /operational-state:entry -->
 
+<!-- operational-state:entry
+{"id":"INV-004","title":"Experiment identity excludes presentation timing","state":"verified","rule":"Experiment deterministic hashes contain simulator state/actions only; human export timestamps and presentation animation are excluded from deterministic identity.","scope":"labui.experiments and replay/export surfaces","authority":"Current user request","evidence":"tests/test_experiments.py plus CLI replay round trip and loopback dashboard smoke passed 2026-09-18","validation_method":"Record/replay hash equality, non-finite validation, metadata exclusion","last_checked":"2026-09-18","status":"active","recheck_trigger":"Any experiment schema, hashing, replay, or export change"}
+-->
+### INV-004 — Experiment identity excludes presentation timing
+- **State:** `verified`
+- **Rule:** Experiment deterministic hashes contain simulator state/actions only; human export timestamps and presentation animation are excluded from deterministic identity.
+- **Evidence:** Experiment regression suite, CLI replay and loopback dashboard smoke passed 2026-09-18.
+- **Status:** active.
+<!-- /operational-state:entry -->
+
 ## 5. Verified Working Behavior
 <!-- operational-state:entry
 {"id":"VER-001","title":"Complete repository baseline validates end to end","state":"verified","capability":"All requested source packages, scenarios, CLI, README, packaging, telemetry, and tests are present and execute under the validated dependency environment.","scope":"entire repository","verification_method":"27-test pytest suite, compileall, placeholder scan, three scenario smokes, dashboard smoke, wheel build, wheel metadata inspection, packaged-code smoke","evidence":"VALIDATION.md","artifact_revision":"v1.0.0","last_verified":"2026-08-26T11:59:02Z","dependencies":"Python 3.11+, NumPy 2.x, Rich 13.7-14.x","freshness":"current","recheck_trigger":"Any source, test, packaging, or dependency-range change"}
@@ -91,6 +101,16 @@ Deliver a complete executable repository with the user-requested source layout, 
 - **Dependencies:** Python 3.11+, NumPy 2.x, Rich 13.7-14.x
 - **Freshness:** current
 - **Recheck trigger:** Any source, test, packaging, or dependency-range change
+<!-- /operational-state:entry -->
+
+<!-- operational-state:entry
+{"id":"VER-002","title":"Versioned experiment record/replay/comparison system","state":"verified","capability":"Six-station laboratory records strict versioned experiment JSON, exports/imports it, replays real simulator logic stepwise or continuously, verifies final hashes, compares runs descriptively, exposes executable invariants, and provides CLI parity.","scope":"labui experiments/server/UI plus cli.main","verification_method":"81-test full suite, compileall, all JS parse, CLI list/run/validate/replay/compare round trip, loopback dashboard smoke","evidence":"VALIDATION.md","artifact_revision":"v1.9.0","last_verified":"2026-09-18T19:53:52Z","dependencies":"existing Python/NumPy/Rich stack only","freshness":"current","recheck_trigger":"Any experiment, session, server route, CLI, or telemetry-ledger change"}
+-->
+### VER-002 — Versioned experiment record/replay/comparison system
+- **State:** `verified`
+- **Capability:** Strict versioned experiment sessions, manual action recording, import/export, real deterministic replay, checkpoint stepping, descriptive A/B comparison, executable invariant proof and CLI parity operate over the existing six-station laboratory.
+- **Evidence:** 81 passing tests, compileall, all shipped JS parse, CLI experiment round trip and loopback dashboard smoke.
+- **Artifact revision:** v1.9.0
 <!-- /operational-state:entry -->
 
 ## 6. Known Not Working
@@ -168,6 +188,8 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 | INV-001 | Immediate heliocide at zero Starsilk | verified | stellar + integration tests | rerun affected tests | stellar/runtime changes |
 | INV-002 | Absolute Syrin nullification | verified | executor + scenario tests | rerun affected tests | nullifier/runtime changes |
 | INV-003 | Deterministic bounded execution | verified | reproducibility, budget, telemetry tests | rerun full deterministic suite | executor/scenario/hash changes |
+| INV-004 | Experiment identity excludes presentation timing | verified | experiment replay/hash tests + CLI/browser smoke | rerun experiment validation | schema/hash/replay/export changes |
+| VER-002 | Experiment record/replay/comparison | verified | 81 tests + compile + JS parse + CLI + dashboard smoke | full experiment ladder | experiment/session/UI/CLI changes |
 | VER-001 | Complete repository baseline | verified | VALIDATION.md | full validation ladder | any repository change |
 | BKN-001 | Planet visible on user macOS path | failed through v1.8.5 | repeated same-path user evidence | same-path visual check | Planet rendering changes |
 | IMP-002 | v1.8.4 lexical binding + persistent fallback repair | failed/superseded | same-path user evidence | none | superseded by v1.8.5 |
@@ -175,9 +197,10 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 | IMP-004 | v1.8.6 non-canvas base scene | implemented-unverified | 65 tests + compile + JS parse + static SVG render + served-order guards | same-path visual check | user confirms v1.8.6 |
 
 ## 12. Current Change Scope and Impact Radius
-Current change scope is the bounded Planet-station visibility repair. Preserve INV-001 through INV-003 and the display-first interaction shell while repairing BKN-001. v1.8.5 is disproved on the real user path. v1.8.6 moves the minimum visible scene into a static SVG resource inserted into the served HTML and keeps dynamic renderers additive only. Do not promote Planet rendering to verified until the same macOS path that reproduced the failure visibly confirms the SVG scene and active-build marker.
+Current completed change scope is the v1.9.0 deterministic experiment-session expansion across the existing six-station command center, CLI and telemetry ledger. Preserve INV-001 through INV-004, all six station identities, the display-first interaction shell, exact-port launch behavior and historical Planet evidence. The experiment/replay capability is verified; BKN-001 / IMP-004 remain separately unresolved pending same-path human visual confirmation and must not be promoted by unrelated simulator tests.
 
 ## 13. Compact Revision Log
+- **Revision 7 — 2026-09-18:** Reconciled the source baseline to v1.9.0 and added the deterministic experiment-session system: strict versioned JSON, manual/preset action recording, six bounded presets, real replay with step/run/pause/checkpoint semantics, replay hash mismatch detection, descriptive A/B comparison, executable invariant proofs, cross-station HeliocideEvent -> Siege Wall composition, browser timeline/proof controls and drakken-lab experiment CLI parity. Validation: 81 tests, compileall, all shipped JS parse, CLI round trip and loopback dashboard smoke. Historical Planet user-path evidence remains unresolved and preserved.
 - **Revision 6 — 2026-08-27:** User disproved v1.8.5 with “no improvement.” The repair strategy changed categories: Station 01 now contains a static SVG celestial scene inserted into the served HTML plus a final safety stylesheet/script and visible build identity. Canvas/WebGL layers are enhancements only; duplicate Planet renderers are suppressed. The launcher now refuses silent port hopping and exposes the build in the terminal, health endpoint, query string, header, and scene badge. User-path verification remains pending.
 - **Revision 5 — 2026-08-27:** User disproved v1.8.4. Reload-flash analysis and full CSS-order audit found two later celestial stylesheets re-promoting the opaque legacy Planet canvas above the replacement scene. v1.8.5 removes both promotions, moves the core CSS contract last, adds inline `!important` transparency for the hit canvas, disables duplicate Station 01 globe renderers, and adds cascade regressions. User-path verification remains pending.
 - **Revision 4 — 2026-08-27:** User disproved v1.8.3 and reported a brief reload glow before the stage returned blank. Root cause isolated to `globalThis.app` misuse plus starfield/fallback z-order. Added v1.8.4 lexical-binding and persistent-fallback repair as implemented-unverified.

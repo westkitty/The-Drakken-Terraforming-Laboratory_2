@@ -1,5 +1,31 @@
 # Validation and Requirement Traceability
 
+## v1.9.0 deterministic experiment-session expansion
+
+The v1.9.0 expansion adds a versioned deterministic experiment contract, real simulator replay, descriptive A/B comparison, six bounded experiment presets, a timeline/invariant proof surface inside the existing telemetry station and CLI parity under drakken-lab experiment.
+
+Historical v1.8.x Planet-render evidence remains preserved and is not promoted by these unrelated experiment tests.
+
+| Check | Evidence | Result |
+|---|---|---|
+| Full Python suite | `.venv/bin/python -m pytest -q` | PASS — 81 tests |
+| Python compilation | `.venv/bin/python -m compileall -q src` | PASS |
+| Shipped browser JavaScript syntax | `node --check` for every `src/labui/static/*.js` | PASS |
+| Preset replay determinism | all six experiment presets replay through real LaboratorySession methods | PASS — recorded and replay hashes match |
+| Session format validation | round trip, unsupported version, malformed/non-finite handling, safe overwrite | PASS |
+| Manual current-session recording | ordinary deterministic station actions enter the experiment action ledger and replay | PASS |
+| Syrin boundary proof | contacted instruction remains prevented; inert attempt is evidence, not mutation | PASS |
+| Heliocide replay proof | partial withdrawal survives; zero depletion collapses in the same deterministic stellar operation | PASS |
+| Cross-station composition | current-session HeliocideEvent -> BlackHoleRecord -> Siege Wall solve | PASS |
+| Comparison semantics | descriptive difference report; no score/winner field | PASS |
+| CLI parity | experiment list/run/validate/replay/compare round trip using temporary files | PASS |
+| Legacy CLI scenario paths | Starbinding, Siege Wall and Syrin scenario commands | PASS |
+| Wheel build | `.venv/bin/python -m pip wheel . --no-deps` to temporary directory | PASS — v1.9.0 wheel built |
+| Loopback dashboard smoke | root/static delivery, six stations present, experiment run/export/replay, replay mismatch absent | PASS |
+| Existing UI build identity guard | `1.9.0-concept-single-globe` preserved | PASS |
+| Same-path user macOS Planet pixels | historical completion evidence remains required | PENDING / NOT CLAIMED |
+
+
 ## v1.8.6 Station 01 visibility repair
 
 User-path evidence disproved v1.8.5: the same macOS browser path still rendered the unchanged blank Planet stage. v1.8.6 therefore moves the final fallback out of Canvas/WebGL entirely. The base celestial scene is a static SVG resource inserted into the served Station 01 HTML before browser scripts execute; a direct last-loaded safety stylesheet/script makes the legacy canvas input-only and exposes a visible build identity.

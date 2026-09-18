@@ -13,6 +13,8 @@ const app = {
   telemetryFilter: "all",
   waveReport: null,
   siegePreviewDirty: true,
+  compareA: null,
+  compareB: null,
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -105,6 +107,7 @@ function renderAll() {
   renderStarbindingPanel();
   renderSiegePanel();
   renderTelemetry();
+  renderExperiments();
   requestAnimationFrame(drawActiveCanvases);
 }
 
@@ -786,6 +789,86 @@ function syntheticSiegePreview() {
   };
 }
 
+function readJsonFile(input, assign) {
+  const file = input.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try { assign(JSON.parse(String(reader.result))); }
+    catch (error) { toast(`Invalid JSON: ${error.message}`, true); }
+  };
+  reader.readAsText(file);
+}
+
+async function refreshState() {
+  app.state = await api("/api/state");
+  renderAll();
+}
+
+async function experimentPost(path, body = {}) {
+  try {
+    const result = await api(path, body);
+    await refreshState();
+    return result;
+  } catch (error) {
+    toast(error.message, true);
+    throw error;
+  }
+}
+
+function initExperimentControls() {
+  $("#experiment-run").addEventListener("click", async () => {
+    await experimentPost("/api/experiment/run-preset", { preset_id: $("#experiment-preset").value });
+    toast("Experiment preset executed through live simulator.");
+  });
+  $("#experiment-record").addEventListener("click", async () => {
+    await experimentPost("/api/experiment/record", {});
+    toast("Current deterministic experiment record captured.");
+  });
+  $("#experiment-export").addEventListener("click", () => { window.location.assign("/api/experiment/export"); });
+  $("#experiment-import").addEventListener("change", () => readJsonFile($("#experiment-import"), async (record) => {
+    await experimentPost("/api/experiment/import", { experiment: record });
+    toast("Experiment imported and validated.");
+  }));
+  $("#replay-start").addEventListener("click", () => experimentPost("/api/experiment/replay/start", {}));
+  $("#replay-step").addEventListener("click", () => experimentPost("/api/experiment/replay/step", {}));
+  $("#replay-run").addEventListener("click", () => experimentPost("/api/experiment/replay/run", {}));
+  $("#replay-pause").addEventListener("click", () => experimentPost("/api/experiment/replay/pause", {}));
+  $("#compare-a").addEventListener("change", () => readJsonFile($("#compare-a"), (record) => { app.compareA = record; }));
+  $("#compare-b").addEventListener("change", () => readJsonFile($("#compare-b"), (record) => { app.compareB = record; }));
+  $("#experiment-compare").addEventListener("click", async () => {
+    if (!app.compareA || !app.compareB) { toast("Choose both experiment JSON files first.", true); return; }
+    try {
+      const result = await api("/api/experiment/compare", { a: app.compareA, b: app.compareB });
+      $("#comparison-result").textContent = JSON.stringify(result, null, 2);
+    } catch (error) { toast(error.message, true); }
+  });
+}
+
+function renderExperiments() {
+  if (!app.state || !app.state.experiments) return;
+  const exp = app.state.experiments;
+  const select = $("#experiment-preset");
+  if (select && !select.options.length) {
+    select.innerHTML = exp.presets.map((p) => `<option value="${escapeHtml(p.id)}">${escapeHtml(p.title)}</option>`).join("");
+  }
+  const current = exp.current || exp.loaded;
+  $("#experiment-status").textContent = current ? `${current.classification} // ${current.experiment_id}` : "NO RECORD";
+  const replay = exp.replay || { cursor: 0, total: 0, mismatch: null };
+  $("#replay-position").textContent = `${replay.cursor} / ${replay.total}`;
+  const events = current?.events || [];
+  $("#experiment-timeline").innerHTML = events.length
+    ? events.map((event) => `<button class="timeline-event" type="button" disabled><b>#${event.index}</b><span>${escapeHtml(event.kind)}</span><em>${escapeHtml(event.message)}</em></button>`).join("")
+    : '<div class="empty-state">Run or import an experiment.</div>';
+  const invariants = current?.invariants || [];
+  const passed = invariants.filter((item) => item.passed).length;
+  $("#invariant-summary").textContent = invariants.length ? `${passed}/${invariants.length} PASS` : "—";
+  $("#invariant-list").innerHTML = invariants.length
+    ? invariants.map((item) => `<div class="invariant-row ${item.passed ? "pass" : "fail"}"><strong>${item.passed ? "PASS" : "FAIL"}</strong><span>${escapeHtml(item.label)}</span><small>${escapeHtml(item.evidence)}</small></div>`).join("")
+    : '<div class="empty-state">No invariant results.</div>';
+  $("#replay-start").classList.toggle("failed", Boolean(replay.mismatch));
+}
+
 function initTelemetryControls() {
   $$("#telemetry-filter button").forEach((button) => {
     button.addEventListener("click", () => {
@@ -817,6 +900,7 @@ async function init() {
   initStarbindingControls();
   initSiegeControls();
   initTelemetryControls();
+  initExperimentControls();
   window.addEventListener("resize", () => requestAnimationFrame(drawActiveCanvases));
   try {
     app.state = await api("/api/state");

@@ -354,6 +354,25 @@ Existing logs are revalidated on resume. A discontinuous sequence or invalid has
 drakken-lab macro sample.starsilk --planet --telemetry telemetry/run.jsonl
 ```
 
+## Deterministic experiment sessions
+
+The laboratory now records versioned experiment sessions that can be exported, imported, replayed, stepped and compared without placing presentation timing into deterministic identity.
+
+The browser command center keeps the existing six stations and adds the experiment/replay console inside the Deterministic Telemetry Ledger. Presets exercise the same simulator objects used by ordinary station controls:
+
+- Partial vs Total Stellar Withdrawal
+- Syrin Interruption Boundary
+- Terraforming Macro Cascade
+- Starbinding Hit / Miss / Partial / Heliocide
+- Siege Wall Stability / Fracture
+- Cross-Station Heliocide -> Siege Wall
+
+Exports include the schema version, classification, initial deterministic configuration, ordered actions, event stream, checkpoints, final state hash, executable invariant results and bounded telemetry summary. A human-friendly export timestamp is metadata only and is excluded from deterministic state hashing.
+
+Replay executes real laboratory methods again. It does not animate captured values. A completed replay compares its actual final deterministic hash against the recorded hash and exposes an explicit mismatch when they differ.
+
+CLI parity is available through the existing drakken-lab experiment command: list, run, validate, replay and compare. CLI export refuses to overwrite an existing experiment file unless --overwrite is supplied. Browser export is an explicit user-initiated download.
+
 ## Determinism contract
 
 The laboratory avoids ambient entropy:

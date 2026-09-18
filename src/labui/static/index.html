@@ -303,6 +303,38 @@ ASSERT pulse == 6</textarea>
               <button data-filter="syrin">Syrin</button>
             </div>
           </div>
+          <section class="visual-card experiment-console" aria-label="Deterministic experiment replay console">
+            <div class="card-chrome"><div><span class="chrome-dot live"></span> EXPERIMENT SESSION / REPLAY</div><div id="experiment-status">NO RECORD</div></div>
+            <div class="experiment-controls">
+              <label>Preset
+                <select id="experiment-preset" aria-label="Experiment preset"></select>
+              </label>
+              <button class="primary-button" id="experiment-run">Run preset</button>
+              <button class="ghost-button" id="experiment-record">Record current</button>
+              <button class="ghost-button" id="experiment-export">Export JSON</button>
+              <label class="file-button">Import JSON<input id="experiment-import" type="file" accept="application/json,.json"></label>
+              <button class="ghost-button" id="replay-start">Replay / reset</button>
+              <button class="ghost-button" id="replay-step">Step</button>
+              <button class="ghost-button" id="replay-run">Run</button>
+              <button class="ghost-button" id="replay-pause">Pause</button>
+            </div>
+            <div class="experiment-grid">
+              <div>
+                <div class="instrument-header"><span>DETERMINISTIC TIMELINE</span><span id="replay-position">0 / 0</span></div>
+                <div id="experiment-timeline" class="experiment-timeline"><div class="empty-state">Run or import an experiment.</div></div>
+              </div>
+              <div>
+                <div class="instrument-header"><span>INVARIANT PROOF</span><span id="invariant-summary">—</span></div>
+                <div id="invariant-list" class="invariant-list"><div class="empty-state">No invariant results.</div></div>
+              </div>
+            </div>
+            <div class="experiment-compare">
+              <label>A JSON<input id="compare-a" type="file" accept="application/json,.json"></label>
+              <label>B JSON<input id="compare-b" type="file" accept="application/json,.json"></label>
+              <button class="ghost-button" id="experiment-compare">Compare A/B</button>
+              <pre id="comparison-result">Comparison reports what differed; it does not invent a quality score.</pre>
+            </div>
+          </section>
           <section class="visual-card telemetry-card">
             <div class="card-chrome"><div><span class="chrome-dot live"></span> SESSION EVENT STREAM</div><div id="telemetry-count">0 EVENTS</div></div>
             <div class="telemetry-table" id="telemetry-list"><div class="empty-state large">No state mutations yet.</div></div>
