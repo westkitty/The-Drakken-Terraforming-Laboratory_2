@@ -6,12 +6,12 @@
   "project_name": "The Drakken Terraforming Laboratory",
   "project_root": "/Users/andrew/The-Drakken-Terraforming-Laboratory_2",
   "artifact_path": "",
-  "state_revision": 7,
-  "last_updated": "2026-09-18T19:53:52Z",
+  "state_revision": 8,
+  "last_updated": "2026-09-18T22:41:42Z",
   "current_baseline": {
-    "identity": "repository v1.9.0 / deterministic experiment-session expansion",
+    "identity": "repository v1.9.0 / deterministic experiments + native macOS wrapper",
     "state": "partially-verified",
-    "last_verified": "2026-09-18T19:53:52Z"
+    "last_verified": "2026-09-18T22:41:42Z"
   },
   "scope_boundaries": [
     "Deterministic computational Starsilk, stellar, terraforming, lattice, scenario, CLI, and test repository",
@@ -25,7 +25,7 @@
 The Drakken Terraforming Laboratory is a Python repository implementing deterministic Starsilk Macro execution, stellar-core collapse mechanics, planetary transformation grids, Siege Wall singularity anchoring, reproducible canonical scenarios, CLI tooling, telemetry, packaging, and tests.
 
 ## 2. Current Baseline
-Repository source is currently v1.9.0. The deterministic experiment-session expansion is verified by 81 passing tests, Python compilation, all shipped JavaScript syntax checks, CLI experiment round trips, and a bounded loopback dashboard replay smoke on 2026-09-18. Historical same-path Planet visual confirmation remains unresolved and is therefore not promoted to verified by the experiment work.
+Repository source is currently v1.9.0. Deterministic experiment sessions and the native macOS AppKit/WebKit wrapper are verified by 85 passing tests, Python compilation, all shipped JavaScript syntax checks, wrapper build/plist/signature checks, LaunchServices execution from `~/Applications`, a persistent owned localhost backend, and repeated exact health identity checks on 2026-09-18. Historical same-path Planet visual confirmation remains unresolved and is not promoted by wrapper/process evidence.
 
 ## 3. Artifact Contract
 Deliver a complete executable repository with the user-requested source layout, no placeholders/TODO stubs, deterministic physics behavior, CLI, scenarios, README, package configuration, and comprehensive tests.
@@ -113,6 +113,17 @@ Deliver a complete executable repository with the user-requested source layout, 
 - **Artifact revision:** v1.9.0
 <!-- /operational-state:entry -->
 
+<!-- operational-state:entry
+{"id":"VER-003","title":"Native macOS laboratory wrapper","state":"verified","capability":"A native AppKit/WKWebView app opens the existing local laboratory in its own macOS window, starts or attaches only to the exact verified localhost backend, preserves persistent WebKit storage plus JSON import/export behavior, and owns only the backend process it launches.","scope":"macos wrapper/build/install path","verification_method":"native Swift build, plist lint, static wrapper regression tests, ad-hoc bundle verification, LaunchServices open from ~/Applications, process persistence and repeated /api/health identity checks","evidence":"VALIDATION.md","artifact_revision":"v1.9.0","last_verified":"2026-09-18T22:41:42Z","dependencies":"macOS 13+, AppKit, WebKit, repository .venv","freshness":"current","recheck_trigger":"Any wrapper Swift, Info.plist, build script, backend launch contract, version/build identity or export/import change"}
+-->
+### VER-003 — Native macOS laboratory wrapper
+- **State:** `verified`
+- **Capability:** The installed native wrapper opens independently of browser chrome, launches the exact loopback backend when necessary, verifies product/version/UI-build identity, preserves persistent WebKit state and import/export paths, and stays alive with its owned backend.
+- **Evidence:** Native build + ad-hoc bundle verification, four wrapper regression tests, final full 85-test suite, LaunchServices open from `~/Applications`, persistent wrapper/backend processes and repeated exact `/api/health` responses.
+- **Artifact revision:** v1.9.0
+- **Distribution status:** local ad-hoc seal only; Developer ID signing/notarization not performed.
+<!-- /operational-state:entry -->
+
 ## 6. Known Not Working
 <!-- operational-state:entry
 {"id":"BKN-001","title":"Planet visualization absent on user macOS path through v1.8.5","state":"failed","capability":"Station 01 should visibly render the planet and celestial environment.","scope":"browser UI / Planet station","evidence":"Repeated same-path user macOS evidence shows shell/state/controls loaded while Station 01 remains visually unchanged through v1.8.5. v1.8.3 briefly flashed a glow during reload; v1.8.5 produced no improvement.","diagnosis":"v1.8.5 disproved the prior cascade-only diagnosis: even after removing known canvas-opacity conflicts, the same user path remained unchanged. The exact late-render failure is therefore still unresolved. v1.8.6 deliberately bypasses that uncertainty by placing the minimum visible celestial scene in a static SVG resource inserted into the HTML response before scripts run, with an independent final safety layer and active-build identity.","last_checked":"2026-08-26","status":"active","recheck_trigger":"User visually confirms v1.8.6 or later on the same Mac browser path"}
@@ -181,6 +192,9 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 - Aureal Gate is anchored at Year 170; no extra exact war-casualty precision is invented.
 - No placeholders, TODOs, stubbed `pass`, or allegorical replacements for canonical physics.
 - Dashboard launch must bind the requested port exactly; it must not silently start a second laboratory instance on another port.
+- The native macOS wrapper may embed only the exact loopback laboratory origin; it must verify product/version/UI-build identity before reusing an existing port-8765 server.
+- Wrapper WebKit storage remains persistent and JSON import/export capabilities must not be lost.
+- Local wrapper builds use a credential-free ad-hoc seal only; do not claim Developer ID signing or notarization without separate evidence.
 
 ## 11. Validation and Evidence Matrix
 | ID | Capability / invariant | State | Evidence | Required recheck | Recheck trigger |
@@ -189,7 +203,8 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 | INV-002 | Absolute Syrin nullification | verified | executor + scenario tests | rerun affected tests | nullifier/runtime changes |
 | INV-003 | Deterministic bounded execution | verified | reproducibility, budget, telemetry tests | rerun full deterministic suite | executor/scenario/hash changes |
 | INV-004 | Experiment identity excludes presentation timing | verified | experiment replay/hash tests + CLI/browser smoke | rerun experiment validation | schema/hash/replay/export changes |
-| VER-002 | Experiment record/replay/comparison | verified | 81 tests + compile + JS parse + CLI + dashboard smoke | full experiment ladder | experiment/session/UI/CLI changes |
+| VER-002 | Experiment record/replay/comparison | verified | experiment tests + compile + JS parse + CLI + dashboard smoke | full experiment ladder | experiment/session/UI/CLI changes |
+| VER-003 | Native macOS wrapper | verified | 85 tests + native build + plist + signature + LaunchServices + health | rebuild/install/runtime smoke | wrapper/build/backend identity changes |
 | VER-001 | Complete repository baseline | verified | VALIDATION.md | full validation ladder | any repository change |
 | BKN-001 | Planet visible on user macOS path | failed through v1.8.5 | repeated same-path user evidence | same-path visual check | Planet rendering changes |
 | IMP-002 | v1.8.4 lexical binding + persistent fallback repair | failed/superseded | same-path user evidence | none | superseded by v1.8.5 |
@@ -197,9 +212,10 @@ Exact bitwise floating-point identity across different CPU architectures and dif
 | IMP-004 | v1.8.6 non-canvas base scene | implemented-unverified | 65 tests + compile + JS parse + static SVG render + served-order guards | same-path visual check | user confirms v1.8.6 |
 
 ## 12. Current Change Scope and Impact Radius
-Current completed change scope is the v1.9.0 deterministic experiment-session expansion across the existing six-station command center, CLI and telemetry ledger. Preserve INV-001 through INV-004, all six station identities, the display-first interaction shell, exact-port launch behavior and historical Planet evidence. The experiment/replay capability is verified; BKN-001 / IMP-004 remain separately unresolved pending same-path human visual confirmation and must not be promoted by unrelated simulator tests.
+Current completed change scope is the v1.9.0 native macOS wrapper over the existing six-station command center. Preserve INV-001 through INV-004, VER-002, all six station identities, persistent browser data, import/export behavior, the display-first interaction shell, exact-port launch behavior and historical Planet evidence. The wrapper/runtime path is verified; BKN-001 / IMP-004 remain separately unresolved pending same-path human visual confirmation and must not be promoted by process/health evidence.
 
 ## 13. Compact Revision Log
+- **Revision 8 — 2026-09-18:** Added a native AppKit/WKWebView wrapper and reproducible macOS build/install path. The wrapper resolves the repo, starts the existing `.venv` dashboard on exact loopback 8765, rejects stale backend identity, retains persistent WebKit data, preserves JSON import/export, sends external links to the system browser, logs backend output and terminates only a backend it owns. A static AppDelegate retention bug and LaunchServices bundle-sealing failure were found during real install testing and repaired. Final evidence: local ad-hoc bundle verifies, installed app opens through LaunchServices, wrapper/backend remain alive, repeated health identity matches, 85 tests pass, compileall/JS parse/plist/build-script checks pass. Developer ID/notarization remain not performed; historical Planet visual evidence remains unresolved.
 - **Revision 7 — 2026-09-18:** Reconciled the source baseline to v1.9.0 and added the deterministic experiment-session system: strict versioned JSON, manual/preset action recording, six bounded presets, real replay with step/run/pause/checkpoint semantics, replay hash mismatch detection, descriptive A/B comparison, executable invariant proofs, cross-station HeliocideEvent -> Siege Wall composition, browser timeline/proof controls and drakken-lab experiment CLI parity. Validation: 81 tests, compileall, all shipped JS parse, CLI round trip and loopback dashboard smoke. Historical Planet user-path evidence remains unresolved and preserved.
 - **Revision 6 — 2026-08-27:** User disproved v1.8.5 with “no improvement.” The repair strategy changed categories: Station 01 now contains a static SVG celestial scene inserted into the served HTML plus a final safety stylesheet/script and visible build identity. Canvas/WebGL layers are enhancements only; duplicate Planet renderers are suppressed. The launcher now refuses silent port hopping and exposes the build in the terminal, health endpoint, query string, header, and scene badge. User-path verification remains pending.
 - **Revision 5 — 2026-08-27:** User disproved v1.8.4. Reload-flash analysis and full CSS-order audit found two later celestial stylesheets re-promoting the opaque legacy Planet canvas above the replacement scene. v1.8.5 removes both promotions, moves the core CSS contract last, adds inline `!important` transparency for the hit canvas, disables duplicate Station 01 globe renderers, and adds cascade regressions. User-path verification remains pending.

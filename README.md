@@ -373,6 +373,41 @@ Replay executes real laboratory methods again. It does not animate captured valu
 
 CLI parity is available through the existing drakken-lab experiment command: list, run, validate, replay and compare. CLI export refuses to overwrite an existing experiment file unless --overwrite is supplied. Browser export is an explicit user-initiated download.
 
+## macOS native wrapper
+
+The repository includes a native AppKit/WebKit wrapper in `macos/`. It presents the existing laboratory in its own macOS window with no browser chrome while keeping the Python simulation server authoritative.
+
+The wrapper:
+
+- loads only `http://127.0.0.1:8765` inside its WebKit surface
+- verifies the laboratory product, package version and UI build before attaching to an already-running server
+- starts the repository `.venv` backend itself when needed and terminates only the backend instance it owns
+- uses the persistent WebKit data store so browser-side IndexedDB/state survives relaunches
+- keeps JSON export working by saving explicit downloads into `~/Downloads` with collision-safe filenames
+- keeps JSON import working through the native file picker
+- opens non-local HTTP/HTTPS links in the system browser rather than inside the laboratory wrapper
+- writes backend launch logs to `~/Library/Logs/DrakkenLabWrapper/backend.log`
+
+Build it from the repository root:
+
+```bash
+./macos/build_macos_wrapper.sh
+```
+
+Build and install to the current user's Applications folder:
+
+```bash
+./macos/build_macos_wrapper.sh --install
+```
+
+Build, install and open it:
+
+```bash
+./macos/build_macos_wrapper.sh --open
+```
+
+The build script applies a credential-free ad-hoc local seal so LaunchServices can run the wrapper normally. It is intentionally not presented as Developer ID signed or notarized; distribution signing/notarization remains a separate release decision.
+
 ## Determinism contract
 
 The laboratory avoids ambient entropy:

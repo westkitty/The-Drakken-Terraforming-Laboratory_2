@@ -1,5 +1,32 @@
 # Validation and Requirement Traceability
 
+## v1.9.0 native macOS wrapper
+
+The local macOS wrapper is a native AppKit/WebKit shell over the existing six-station browser laboratory. It does not replace the Python simulator or introduce a second application model. The installed wrapper resolves the repository, launches the exact local `.venv` dashboard backend when needed, verifies the backend product/version/UI-build identity and loads only the loopback origin inside WebKit.
+
+| Check | Evidence | Result |
+|---|---|---|
+| Native build | `macos/build_macos_wrapper.sh` using Apple Swift 6.2.4 / macOS SDK 26.2 | PASS |
+| Bundle structure | Info.plist, executable bit, arm64 Mach-O and AppKit/WebKit linkage | PASS |
+| Plist validation | `plutil -lint macos/Info.plist` | PASS |
+| Local-only ATS | `NSAllowsLocalNetworking=true`; no arbitrary-load exception | PASS |
+| Backend identity gate | wrapper requires product, v1.9.0 and `1.9.0-concept-single-globe` health identity | PASS |
+| Persistent browser data | wrapper uses `WKWebsiteDataStore.default()` | PASS |
+| Import/export preservation | native file picker plus collision-safe Downloads handling for state/experiment JSON | PASS — source regression coverage |
+| External navigation boundary | only 127.0.0.1:8765 stays in wrapper; external HTTP/HTTPS opens via system browser | PASS — source regression coverage |
+| Local app seal | credential-free ad-hoc bundle seal; `codesign --verify --deep --strict` | PASS |
+| Developer ID / notarization | no Developer ID identity or notarization requested/performed | NOT PERFORMED |
+| Gatekeeper distribution assessment | `spctl --assess` rejects ad-hoc local build | EXPECTED — not a distribution release |
+| Installed artifact | `~/Applications/Drakken Terraforming Laboratory.app` | PASS |
+| LaunchServices open | installed app opened through `open`; wrapper process remained alive | PASS |
+| Owned backend launch | `.venv` Python dashboard child remains alive on 127.0.0.1:8765 | PASS |
+| Runtime health | repeated `/api/health` returned product v1.9.0 and correct UI build | PASS |
+| Full Python suite after wrapper work | `.venv/bin/python -m pytest -q` | PASS — 85 tests |
+| Python compilation | `.venv/bin/python -m compileall -q src` | PASS |
+| Shipped JS syntax | `node --check` on every shipped JS file | PASS |
+| Wrapper build-script syntax | `zsh -n macos/build_macos_wrapper.sh` | PASS |
+| Existing same-path Planet pixel proof | prior human-visible issue remains separate | PENDING / NOT CLAIMED |
+
 ## v1.9.0 deterministic experiment-session expansion
 
 The v1.9.0 expansion adds a versioned deterministic experiment contract, real simulator replay, descriptive A/B comparison, six bounded experiment presets, a timeline/invariant proof surface inside the existing telemetry station and CLI parity under drakken-lab experiment.
